@@ -46,63 +46,64 @@ class DanfossAlly extends utils.Adapter {
    * Geräte abrufen und States aktualisieren
    */
   async updateDevices() {
-    try {
-      const devices = await this.api.getDevices();
-      if (!devices || !devices.length) {
-        this.log.warn('⚠️ No devices found from Danfoss API.');
-        return;
-      }
+  try {
+    const devices = await this.api.getDevices();
+    if (!devices || !devices.length) {
+      this.log.warn('⚠️ No devices found from Danfoss API.');
+      return;
+    }
 
-      this.log.info(`📡 Found ${devices.length} devices, updating states...`);
+    this.log.info(`📡 Found ${devices.length} devices, updating states...`);
 
-      for (const dev of devices) {
-        const devId = dev.id;
-        const devPath = `devices.${devId}`;
+    for (const dev of devices) {
+      const devId = dev.id;
+      const devPath = `devices.${devId}`;
 
-        await this.setObjectNotExistsAsync(devPath, {
-          type: 'channel',
-          common: { name: dev.name },
-          native: dev.raw,
-        });
+      await this.setObjectNotExistsAsync(devPath, {
+        type: 'channel',
+        common: { name: dev.name },
+        native: dev.raw,
+      });
 
-        // Alle Statuswerte anlegen
-        const status = dev.status || {};
-        for (const [code, value] of Object.entries(status)) {
-          const type = typeof value === 'number' ? 'number' :
-                       typeof value === 'boolean' ? 'boolean' : 'string';
+      const status = dev.status || {};
+      for (const st of status) {
+        const code = st.code;
+        let value = st.value;
 
-          await this.setObjectNotExistsAsync(`${devPath}.${code}`, {
-            type: 'state',
-            common: {
-              name: code,
-              type,
-              role: this.mapRole(code),
-              unit: this.mapUnit(code),
-              read: true,
-              write: false,
-            },
-            native: {},
-          });
-
-          await this.setStateAsync(`${devPath}.${code}`, { val: value, ack: true });
+        // 🔁 Werte-Skalierung (Zehntelwerte in echte Einheiten umrechnen)
+        if (['temp_current', 'temp_set', 'upper_temp', 'lower_temp', 'at_home_setting', 'leaving_home_setting', 'pause_setting', 'holiday_setting'].includes(code)) {
+          value = value / 10;
+        }
+        if (code === 'humidity_value') {
+          value = value / 10;
         }
 
-        // Wichtige Standardwerte (Temperatur, Feuchte, Batterie, Mode)
-        if (dev.temperature !== null)
-          await this.setStateAsync(`${devPath}.temperature`, { val: dev.temperature, ack: true });
-        if (dev.humidity !== null)
-          await this.setStateAsync(`${devPath}.humidity`, { val: dev.humidity, ack: true });
-        if (dev.battery !== null)
-          await this.setStateAsync(`${devPath}.battery`, { val: dev.battery, ack: true });
-        if (dev.mode)
-          await this.setStateAsync(`${devPath}.mode`, { val: dev.mode, ack: true });
-      }
+        const type = typeof value === 'number' ? 'number' :
+                     typeof value === 'boolean' ? 'boolean' : 'string';
 
-      this.log.info(`✅ Updated ${devices.length} devices from Danfoss Ally Cloud.`);
-    } catch (err) {
-      this.log.error(`❌ Error updating devices: ${err.message}`);
+        await this.setObjectNotExistsAsync(`${devPath}.${code}`, {
+          type: 'state',
+          common: {
+            name: code,
+            type,
+            role: this.mapRole(code),
+            unit: this.mapUnit(code),
+            read: true,
+            write: false,
+          },
+          native: {},
+        });
+
+        await this.setStateAsync(`${devPath}.${code}`, { val: value, ack: true });
+      }
     }
+
+    this.log.info(`✅ Updated ${devices.length} devices from Danfoss Ally Cloud.`);
+  } catch (err) {
+    this.log.error(`❌ Error updating devices: ${err.message}`);
   }
+}
+
 
   /**
    * Mappt API-Code → ioBroker-Rolle
