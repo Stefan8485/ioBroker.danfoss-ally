@@ -1,39 +1,70 @@
 <h1>ioBroker.danfoss-ally</h1>
-<p><strong>Version 0.2.0 (Oktober 2025)</strong></p>
-<p>Adapter für die Danfoss Ally™ Cloud API – liest alle Geräte und Sensordaten direkt aus der Cloud aus.</p>
+<p><strong>Version 0.2.0 (October 2025)</strong></p>
 
-<h2>Funktionen</h2>
+<p>Cloud adapter for <strong>Danfoss Ally™</strong> using OAuth2 Client Credentials.</p>
+<p>Reads temperature, humidity, valve position, and battery for all devices in your Danfoss Ally account.</p>
+
+<h2>Features</h2>
 <ul>
-  <li>Automatische Token-Erneuerung (OAuth2)</li>
-  <li>Geräteerkennung (Danfoss Icon2 RT, Controller, Gateway)</li>
-  <li>Sensorwerte mit korrekten Einheiten (°C /% etc.)</li>
-  <li>Periodische Aktualisierung (Polling-Intervall konfigurierbar)</li>
+  <li>Automatic OAuth2 token refresh</li>
+  <li>Discovers all registered devices</li>
+  <li>Reads and scales temperature and humidity values (°C / %)</li>
+  <li>Configurable polling interval</li>
+  <li>Detailed logging for device updates</li>
 </ul>
 
-<h2>Konfiguration</h2>
+<h2>Configuration</h2>
 <table border="1" cellspacing="0" cellpadding="4">
-<tr><th>Feld</th><th>Beschreibung</th></tr>
-<tr><td>API Key</td><td>Danfoss Developer Key</td></tr>
-<tr><td>API Secret</td><td>Danfoss Developer Secret</td></tr>
-<tr><td>Token URL</td><td>https://api.danfoss.com/oauth2/token</td></tr>
-<tr><td>API Base URL</td><td>https://api.danfoss.com/ally</td></tr>
-<tr><td>Polling Interval</td><td>Standard = 60 Sekunden</td></tr>
+<tr><th>Field</th><th>Description</th></tr>
+<tr><td>API Key / Secret</td><td>Your Danfoss Developer credentials</td></tr>
+<tr><td>Token URL</td><td>OAuth2 token endpoint (e.g. <code>https://api.danfoss.com/oauth2/token</code>)</td></tr>
+<tr><td>API Base URL</td><td>Base API endpoint (e.g. <code>https://api.danfoss.com/ally</code>)</td></tr>
+<tr><td>Scope</td><td>Optional (e.g. <code>read write</code>)</td></tr>
+<tr><td>Polling Interval</td><td>Default 60 seconds</td></tr>
 </table>
 
-<h2>Datenpunkte</h2>
-<p>Alle Werte liegen unter <code>danfoss-ally.0.devices.&lt;DeviceID&gt;</code></p>
+<h2>States</h2>
+<p>For each discovered device, a channel is created under <code>danfoss-ally.0.devices.&lt;device_id&gt;</code>.</p>
 <ul>
-  <li><b>temp_current</b> – Aktuelle Temperatur (°C)</li>
-  <li><b>temp_set</b> – Solltemperatur (°C)</li>
-  <li><b>humidity_value</b> – Luftfeuchte (%)</li>
-  <li><b>battery_percentage</b> – Batteriestand (%)</li>
-  <li><b>mode</b> – Betriebsmodus (z. B. holiday, auto)</li>
-  <li><b>work_state</b> – Heizstatus</li>
-  <li><b>fault</b> – Fehlerstatus</li>
+  <li><b>temp_current</b> – Current temperature (°C)</li>
+  <li><b>temp_set</b> – Target temperature (°C)</li>
+  <li><b>humidity_value</b> – Relative humidity (%)</li>
+  <li><b>battery_percentage</b> – Battery level (%)</li>
+  <li><b>mode</b> – Operating mode (auto, holiday, manual...)</li>
+  <li><b>work_state</b> – Heating state</li>
+  <li><b>fault</b> – Error code</li>
+  <li><b>output_status</b> – Valve/output status</li>
 </ul>
 
-<h2>Changelog</h2>
-<p><b>v0.2.0</b> – Skalierung korrigiert, Einheiten hinzugefügt, Logging verbessert.</p>
-<p><b>v0.1.0</b> – Grundversion mit Geräteerkennung.</p>
+<h2>Token Handling</h2>
+<ul>
+  <li>Automatic token request on startup</li>
+  <li>Token refresh before expiration</li>
+  <li>Automatic retry on 401 Unauthorized</li>
+</ul>
 
-<p><i>© 2025 Stefan Koch</i></p>
+<h2>API Endpoints</h2>
+<ul>
+  <li>POST /oauth2/token</li>
+  <li>GET /devices</li>
+  <li>GET /devices/{id}/status</li>
+  <li>GET /devices/{id}</li>
+  <li>POST /devices/{id}/commands (future)</li>
+</ul>
+
+<h2>Example Log Output</h2>
+<pre>
+🔄 Starting Danfoss Ally adapter...
+🔑 Refreshing OAuth2 token...
+✅ Token acquired. Expires in ~3599 s
+📡 Found 13 devices, updating states...
+✅ Updated 13 devices from Danfoss Ally Cloud.
+⏱ Polling interval set to 600 s
+</pre>
+
+<h2>Changelog</h2>
+<p><b>v0.2.0</b> – Added token refresh, scaling, and improved logging.</p>
+<p><b>v0.1.0</b> – Initial release with basic device detection.</p>
+
+<h2>License</h2>
+<p>GPL-3.0<br>Maintained by community contributors.</p>
