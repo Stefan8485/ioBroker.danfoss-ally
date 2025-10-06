@@ -35,7 +35,7 @@
     "tokenUrl": "https://api.danfoss.com/oauth2/token",
     "apiBaseUrl": "https://api.danfoss.com/ally",
     "scope": "",
-    "pollingInterval": 60
+    "pollingInterval": 600
   },
   "objects": []
 }
