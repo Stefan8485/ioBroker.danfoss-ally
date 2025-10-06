@@ -65,21 +65,31 @@ class DanfossAlly extends utils.Adapter {
         native: dev.raw,
       });
 
-      const status = dev.status || {};
-      for (const st of status) {
+      // Status abrufen – API liefert ihn direkt im Objekt
+      const statusArray = Array.isArray(dev.status) ? dev.status : [];
+
+      for (const st of statusArray) {
         const code = st.code;
         let value = st.value;
 
-        // 🔁 Werte-Skalierung (Zehntelwerte in echte Einheiten umrechnen)
-        if (['temp_current', 'temp_set', 'upper_temp', 'lower_temp', 'at_home_setting', 'leaving_home_setting', 'pause_setting', 'holiday_setting'].includes(code)) {
-          value = value / 10;
-        }
-        if (code === 'humidity_value') {
-          value = value / 10;
+        // 🔁 Werte-Skalierung
+        if (
+          [
+            'temp_current', 'temp_set', 'upper_temp', 'lower_temp',
+            'at_home_setting', 'leaving_home_setting', 'pause_setting', 'holiday_setting'
+          ].includes(code)
+        ) {
+          value = value / 10; // Zehntelgrad → °C
+        } else if (code === 'humidity_value') {
+          value = value / 10; // Zehntel-% → %
         }
 
-        const type = typeof value === 'number' ? 'number' :
-                     typeof value === 'boolean' ? 'boolean' : 'string';
+        const type =
+          typeof value === 'number'
+            ? 'number'
+            : typeof value === 'boolean'
+            ? 'boolean'
+            : 'string';
 
         await this.setObjectNotExistsAsync(`${devPath}.${code}`, {
           type: 'state',
