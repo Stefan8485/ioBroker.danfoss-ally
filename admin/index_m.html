@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Danfoss Ally</title>
+  </head>
+  <body>
+    <div class="form-group">
+      <label>API Key (Client ID)</label>
+      <input class="value" id="apiKey" type="text" />
+    </div>
+    <div class="form-group">
+      <label>API Secret (Client Secret)</label>
+      <input class="value" id="apiSecret" type="password" />
+    </div>
+    <div class="form-group">
+      <label>Token URL (OAuth2)</label>
+      <input class="value" id="tokenUrl" type="text" placeholder="https://api.danfoss.com/oauth2/token" />
+    </div>
+    <div class="form-group">
+      <label>API Base URL</label>
+      <input class="value" id="apiBaseUrl" type="text" placeholder="https://api.danfoss.com/ally" />
+    </div>
+    <div class="form-group">
+      <label>Scope (optional)</label>
+      <input class="value" id="scope" type="text" />
+    </div>
+    <div class="form-group">
+      <label>Polling interval (seconds)</label>
+      <input class="value" id="pollingInterval" type="number" min="15" value="60" />
+    </div>
+  </body>
+</html>

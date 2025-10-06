@@ -1,0 +1,35 @@
+{
+  "common": {
+    "name": "danfoss-ally",
+    "version": "0.1.0",
+    "title": "Danfoss Ally Cloud Adapter",
+    "titleLang": {
+      "en": "Danfoss Ally Cloud Adapter",
+      "de": "Danfoss Ally Cloud Cloud-Adapter"
+    },
+    "news": {},
+    "license": "GPL-3.0",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "authors": [
+      "Stefan Koch <stefan8485@me.com>"
+    ],
+    "enabled": true,
+    "mode": "daemon",
+    "icon": "danfoss.png",
+    "extIcon": "",
+    "materialize": true,
+    "loglevel": "info",
+    "type": "climate-control",
+    "compact": true
+  },
+  "native": {
+    "apiKey": "",
+    "apiSecret": "",
+    "tokenUrl": "",
+    "apiBaseUrl": "https://api.danfoss.com/ally",
+    "scope": "",
+    "pollingInterval": 60
+  },
+  "objects": []
+}

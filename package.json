@@ -1,0 +1,15 @@
+{
+  "name": "iobroker.danfoss-ally",
+  "version": "0.1.0",
+  "description": "ioBroker adapter for Danfoss Ally Cloud (API key + secret)",
+  "author": "Stefan Koch",
+  "license": "GPL-3.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "node main.js"
+  },
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.0.0",
+    "axios": "^1.7.0"
+  }
+}
