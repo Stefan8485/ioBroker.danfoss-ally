@@ -32,7 +32,7 @@
   "native": {
     "apiKey": "",
     "apiSecret": "",
-    "tokenUrl": "",
+    "tokenUrl": "https://api.danfoss.com/oauth2/token",
     "apiBaseUrl": "https://api.danfoss.com/ally",
     "scope": "",
     "pollingInterval": 60
