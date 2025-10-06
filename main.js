@@ -1,5 +1,4 @@
 'use strict';
-
 const utils = require('@iobroker/adapter-core');
 const DanfossAPI = require('./lib/danfossApi');
 
@@ -23,48 +22,57 @@ class DanfossAlly extends utils.Adapter {
       return;
     }
 
-    this.api = new DanfossAPI({ apiKey, apiSecret, tokenUrl, apiBaseUrl, scope });
-    await this.api.init();
+    // Danfoss API initialisieren
+    this.api = new DanfossAPI(
+      { apiKey, apiSecret, tokenUrl, apiBaseUrl, scope },
+      this.log
+    );
 
-    await this.updateDevices();
-    this.pollInterval = this.setInterval(() => this.updateDevices(), (pollingInterval || 60) * 1000);
+    try {
+      // Erstmalig Token prüfen
+      await this.api.ensureToken();
+      await this.updateDevices();
+
+      // Polling starten
+      const interval = (pollingInterval || 60) * 1000;
+      this.pollInterval = this.setInterval(() => this.updateDevices(), interval);
+      this.log.info(`⏱ Polling interval set to ${pollingInterval}s`);
+    } catch (err) {
+      this.log.error(`❌ Adapter startup failed: ${err.message}`);
+    }
   }
 
   async updateDevices() {
     try {
       const devices = await this.api.getDevices();
-      if (!devices || !Object.keys(devices).length) {
+      if (!devices.length) {
         this.log.warn('No devices found from Danfoss API.');
         return;
       }
 
-      for (const [id, dev] of Object.entries(devices)) {
-        await this.setObjectNotExistsAsync(`devices.${id}`, {
+      for (const dev of devices) {
+        const devId = dev.id;
+        await this.setObjectNotExistsAsync(`devices.${devId}`, {
           type: 'channel',
-          common: { name: dev.name || id },
-          native: dev,
+          common: { name: dev.name },
+          native: dev.raw,
         });
 
-        const states = {
-          temperature: dev.temperature,
-          humidity: dev.humidity,
-          valve: dev.valve,
-          battery: dev.battery,
-        };
-
-        for (const [key, value] of Object.entries(states)) {
-          if (value !== undefined) {
-            await this.setObjectNotExistsAsync(`devices.${id}.${key}`, {
+        const status = await this.api.getDeviceStatus(devId);
+        if (status) {
+          for (const [key, value] of Object.entries(status)) {
+            if (typeof value === 'object') continue;
+            await this.setObjectNotExistsAsync(`devices.${devId}.${key}`, {
               type: 'state',
-              common: { name: key, type: 'number', role: 'value', read: true, write: false },
+              common: { name: key, type: typeof value, role: 'value', read: true, write: false },
               native: {},
             });
-            await this.setStateAsync(`devices.${id}.${key}`, value, true);
+            await this.setStateAsync(`devices.${devId}.${key}`, { val: value, ack: true });
           }
         }
       }
 
-      this.log.info(`✅ Updated ${Object.keys(devices).length} devices from Danfoss Ally Cloud.`);
+      this.log.info(`✅ Updated ${devices.length} devices from Danfoss Ally Cloud.`);
     } catch (err) {
       this.log.error(`❌ Error updating devices: ${err.message}`);
     }
