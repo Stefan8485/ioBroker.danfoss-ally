@@ -15,7 +15,7 @@
   	"0.1.0": {
     	"en": "Initial version with OAuth2 token refresh and automatic device discovery.",
     	"de": "Erste Version mit OAuth2-Token-Erneuerung und automatischer Geräteerkennung."
-  	}
+  	},
     "platform": "Javascript/Node.js",
     "main": "main.js",
     "authors": [
