@@ -5,27 +5,24 @@
     "title": "Danfoss Ally Cloud Adapter",
     "titleLang": {
       "en": "Danfoss Ally Cloud Adapter",
-      "de": "Danfoss Ally Cloud Cloud-Adapter"
-	},
-    "news": {},
+      "de": "Danfoss Ally Cloud Adapter"
+    },
+    "news": {
+      "0.1.0": {
+        "en": "Initial version with OAuth2 token refresh and automatic device discovery.",
+        "de": "Erste Version mit OAuth2-Token-Erneuerung und automatischer Geräteerkennung."
+      }
+    },
     "license": "GPL-3.0",
-	"readme": "https://github.com/Stefan8485/ioBroker.danfoss-ally/blob/main/README.md",
-	"licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html",
-	"news": {
-  	"0.1.0": {
-    	"en": "Initial version with OAuth2 token refresh and automatic device discovery.",
-    	"de": "Erste Version mit OAuth2-Token-Erneuerung und automatischer Geräteerkennung."
-  	},
+    "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "readme": "https://github.com/Stefan8485/ioBroker.danfoss-ally/blob/main/README.md",
     "platform": "Javascript/Node.js",
     "main": "main.js",
-    "authors": [
-      "Stefan Koch <stefan8485@me.com>"
-    ],
+    "authors": ["Stefan Koch <stefan@koch-cabletec.com>"],
     "enabled": true,
     "mode": "daemon",
-	"icon": "danfoss.svg",
-	"extIcon": "https://raw.githubusercontent.com/Stefan8485/ioBroker.danfoss-ally/main/admin/danfoss.svg",
-    "materialize": true,
+    "icon": "danfoss.svg",
+    "extIcon": "https://raw.githubusercontent.com/Stefan8485/ioBroker.danfoss-ally/main/admin/danfoss.svg",
     "loglevel": "info",
     "type": "climate-control",
     "compact": true
