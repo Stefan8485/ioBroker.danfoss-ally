@@ -6,7 +6,7 @@
     "titleLang": {
       "en": "Danfoss Ally Cloud Adapter",
       "de": "Danfoss Ally Cloud Cloud-Adapter"
-    },
+	},
     "news": {},
     "license": "GPL-3.0",
     "platform": "Javascript/Node.js",
@@ -16,8 +16,8 @@
     ],
     "enabled": true,
     "mode": "daemon",
-    "icon": "danfoss.png",
-    "extIcon": "",
+	"icon": "danfoss.svg",
+	"extIcon": "https://raw.githubusercontent.com/Stefan8485/ioBroker.danfoss-ally/main/admin/danfoss.svg",
     "materialize": true,
     "loglevel": "info",
     "type": "climate-control",
