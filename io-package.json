@@ -26,7 +26,8 @@
     "loglevel": "info",
     "type": "climate-control",
     "compact": true,
-    "materialize": true
+    "materialize": true,
+    "adminUI": { "config": "materialize" }
   },
   "native": {
     "apiKey": "",
