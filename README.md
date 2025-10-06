@@ -1,42 +1,122 @@
-# ioBroker.danfoss-ally (v0.1.0)
+# ioBroker.danfoss-ally
+Cloud adapter for **Danfoss Ally™** – using OAuth2 (Client Credentials).  
+Reads temperature, humidity, valve position, and battery data for all devices in your Ally account.
 
-**Cloud adapter for Danfoss Ally** using API Key + Secret (OAuth2 Client Credentials).
-Reads temperature, humidity, valve position, and battery for all devices in your Ally account.
+---
 
-> ⚠️ You must configure the **Token URL** (OAuth2) and **API Base URL** in the instance settings.
-> These values differ depending on Danfoss' environment/region and your developer app settings.
+## 🔧 Features
+- Connects ioBroker directly to the **Danfoss Ally Cloud API**
+- Automatic **OAuth2 token refresh**
+- Discovers all registered devices
+- Reads all available **sensor data (temperature, humidity, battery, valve, etc.)**
+- Converts raw values (×0.1) into real units (°C, %)
+- Fully automatic polling
 
-## Settings
-- **API Key / API Secret** — your Danfoss developer app credentials
-- **Token URL** — OAuth2 token endpoint (e.g. `https://api.danfoss.com/oauth2/token`)
-- **API Base URL** — e.g. `https://api.danfoss.com/ally`
-- **Scope** — optional OAuth2 scope string
-- **Polling Interval** — seconds (default 60)
+### Supported Devices
+- Danfoss Icon2 RT (Room thermostats)
+- Danfoss Icon2 Controller
+- Danfoss Ally™ Gateway  
+(Additional devices are automatically detected)
 
-## States
-For each discovered device, the adapter creates:
-```
-danfoss-ally.0.devices.<device_id>.temperature (°C)
-danfoss-ally.0.devices.<device_id>.humidity    (%)
-danfoss-ally.0.devices.<device_id>.valve       (%)
-danfoss-ally.0.devices.<device_id>.battery     (%)
-danfoss-ally.0.devices.<device_id>.raw         (JSON string snapshot)
-```
+---
 
-## Notes
-- The adapter implements **token refresh**. On HTTP 401 it retries once with a fresh token automatically.
-- Endpoints used:
-  - `GET /devices`
-  - `GET /devices/{id}/status` (fallback to `GET /devices/{id}` if not available)
-  - `POST /devices/{id}/commands` (not used in v0.1 for control)
-- Depending on the exact API variant, the `status` keys may differ; the adapter tries to map common ones.
+## ⚙️ Configuration
+Configure under **Instances → danfoss-ally → Settings**:
 
-## Development
-```
+| Field | Description |
+|--------|--------------|
+| **API Key / Secret** | Your Danfoss Developer App credentials |
+| **Token URL** | OAuth2 token endpoint (e.g. `https://api.danfoss.com/oauth2/token`) |
+| **API Base URL** | Base API endpoint (e.g. `https://api.danfoss.com/ally`) |
+| **Scope** | Optional (e.g. `read write`) |
+| **Polling Interval** | Interval in seconds (default: `60`) |
+
+### Example Configuration
+API Key:      mxqNgoRTnWYSWMG01Oo4wpTxwjS6SyXyMcY1ih02irIBsOPW
+API Secret:   [your secret]
+Token URL:    https://api.danfoss.com/oauth2/token
+API Base URL: https://api.danfoss.com/ally
+Polling:      600
+
+---
+
+## 📊 States
+For each discovered device, the adapter creates a channel:
+danfoss-ally.0.devices.<device_id>.
+
+| State | Description | Unit |
+|--------|--------------|------|
+| `temp_current` | Current room temperature | °C |
+| `temp_set` | Target temperature | °C |
+| `humidity_value` | Relative humidity | % |
+| `battery_percentage` | Battery level | % |
+| `mode` | Current mode (auto, holiday, manual, etc.) | – |
+| `work_state` | Heating state | – |
+| `fault` | Error code | – |
+| `output_status` | Valve or output status | – |
+| `upper_temp` / `lower_temp` | Limit settings | °C |
+| ... | Additional fields depending on Danfoss API | – |
+
+All temperature and humidity values are automatically converted from **tenths** to **real units** (°C / %).
+
+---
+
+## 🧠 Token Handling
+- Adapter uses **OAuth2 Client Credentials Flow**
+- Automatically requests token on startup
+- Refreshes automatically before expiration
+- If an API call returns 401, it retries once with a new token
+
+---
+
+## 🌐 API Endpoints
+Used Danfoss Ally endpoints:
+- `POST /oauth2/token` – retrieve OAuth2 access token
+- `GET /devices` – list devices
+- `GET /devices/{id}/status` – device status
+- `GET /devices/{id}` – fallback for status
+- `POST /devices/{id}/commands` – (reserved for future write support)
+
+---
+
+## 🕒 Polling
+- Data is refreshed from the cloud periodically  
+- Default: every 60 seconds  
+- Configurable via adapter settings  
+
+---
+
+## 📦 Changelog
+
+**v0.2.0**
+- Added automatic token refresh
+- Added scaling for °C / % values
+- Improved logging and state creation
+- Expanded unit & role mapping
+- Device discovery and sensor updates verified
+
+**v0.1.0**
+- Initial release with basic device detection and token handling
+
+---
+
+## Example Log Output
+🔄 Starting Danfoss Ally adapter…
+🔑 Refreshing OAuth2 token…
+✅ Token acquired. Expires in ~3599 s
+📡 Found 13 devices, updating states…
+✅ Updated 13 devices from Danfoss Ally Cloud.
+⏱ Polling interval set to 600 s
+
+---
+
+## 🧩 Development
 npm i
 node main.js
-```
 or install via ioBroker dev tooling.
 
-## License
-GPL-3.0
+---
+
+## ⚖️ License
+GPL-3.0  
+Maintained by community contributors.
