@@ -9,6 +9,13 @@
 	},
     "news": {},
     "license": "GPL-3.0",
+	"readme": "https://github.com/Stefan8485/ioBroker.danfoss-ally/blob/main/README.md",
+	"licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html",
+	"news": {
+  	"0.1.0": {
+    	"en": "Initial version with OAuth2 token refresh and automatic device discovery.",
+    	"de": "Erste Version mit OAuth2-Token-Erneuerung und automatischer Geräteerkennung."
+  	}
     "platform": "Javascript/Node.js",
     "main": "main.js",
     "authors": [
