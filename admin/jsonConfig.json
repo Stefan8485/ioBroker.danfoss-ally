@@ -2,62 +2,33 @@
   "type": "panel",
   "i18n": true,
   "items": {
-    "_logo": {
-      "type": "image",
-      "src": "danfoss.svg",
-      "style": { "width": "160px", "margin": "auto", "display": "block" }
+    "_headerRow": {
+      "type": "row",
+      "items": {
+        "_logo": {
+          "type": "image",
+          "src": "danfoss.svg",
+          "style": { "height": "48px", "marginRight": "10px" },
+          "md": 2
+        },
+        "_title": {
+          "type": "staticText",
+          "text": "Danfoss Ally Cloud Adapter",
+          "style": {
+            "fontSize": "1.4rem",
+            "fontWeight": "600",
+            "marginTop": "10px"
+          },
+          "md": 10
+        }
+      }
     },
-    "_header": {
-      "type": "header",
-      "text": "Danfoss Ally Cloud Adapter",
-      "size": 3,
-      "newLine": true,
-      "style": { "textAlign": "center", "marginBottom": 20 }
-    },
-    "apiKey": {
-      "type": "text",
-      "label": "API Key (Client ID)",
-      "sm": 12,
-      "md": 6,
-      "lg": 4
-    },
-    "apiSecret": {
-      "type": "password",
-      "label": "API Secret (Client Secret)",
-      "sm": 12,
-      "md": 6,
-      "lg": 4
-    },
-    "tokenUrl": {
-      "type": "text",
-      "label": "Token URL (OAuth2)",
-      "sm": 12,
-      "md": 6,
-      "lg": 4
-    },
-    "apiBaseUrl": {
-      "type": "text",
-      "label": "API Base URL",
-      "default": "https://api.danfoss.com/ally",
-      "sm": 12,
-      "md": 6,
-      "lg": 4
-    },
-    "scope": {
-      "type": "text",
-      "label": "Scope (optional)",
-      "sm": 12,
-      "md": 6,
-      "lg": 4
-    },
-    "pollingInterval": {
-      "type": "number",
-      "label": "Polling Interval (s)",
-      "min": 15,
-      "default": 60,
-      "sm": 12,
-      "md": 6,
-      "lg": 4
-    }
+    "_spacer": { "type": "divider", "style": { "marginTop": 20 } },
+    "apiKey": { "type": "text", "label": "API Key (Client ID)", "md": 6 },
+    "apiSecret": { "type": "password", "label": "API Secret (Client Secret)", "md": 6 },
+    "tokenUrl": { "type": "text", "label": "Token URL (OAuth2)", "default": "https://api.danfoss.com/oauth2/token", "md": 6 },
+    "apiBaseUrl": { "type": "text", "label": "API Base URL", "default": "https://api.danfoss.com/ally/v1", "md": 6 },
+    "scope": { "type": "text", "label": "Scope (optional)", "md": 6 },
+    "pollingInterval": { "type": "number", "label": "Polling Interval (s)", "default": 60, "min": 15, "md": 6 }
   }
 }
