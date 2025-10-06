@@ -1,42 +1,40 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="UTF-8" />
+    <meta charset="utf-8" />
     <title>Danfoss Ally Cloud Adapter</title>
     <link rel="stylesheet" href="../../css/adapter.css" />
     <link rel="stylesheet" href="../../lib/css/materialize.css" />
     <script type="text/javascript" src="../../lib/js/jquery-3.3.1.min.js"></script>
-    <script type="text/javascript" src="../../socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="../../lib/js/materialize.js"></script>
     <script type="text/javascript" src="../../js/translate.js"></script>
     <script type="text/javascript" src="../../js/adapter-settings.js"></script>
-    <script type="text/javascript" src="../../lib/js/materialize.js"></script>
     <script type="text/javascript" src="words.js"></script>
 
     <script>
-      const defaults = {
-        apiKey: '',
-        apiSecret: '',
-        tokenUrl: 'https://api.danfoss.com/oauth2/token',
-        apiBaseUrl: 'https://api.danfoss.com/ally',
-        scope: '',
-        pollingInterval: 60
-      };
-
       function load(settings, onChange) {
         if (!settings) return;
         $('.value').each(function () {
           const id = $(this).attr('id');
-          const val = settings[id] || defaults[id];
-          $(this).val(val).on('change keyup', () => onChange());
+          const val = settings[id];
+          if ($(this).attr('type') === 'checkbox') {
+            $(this).prop('checked', val).on('change', () => onChange());
+          } else {
+            $(this).val(val).on('change keyup', () => onChange());
+          }
         });
-        onChange(false);
         M.updateTextFields();
+        onChange(false);
       }
 
       function save(callback) {
         const obj = {};
         $('.value').each(function () {
-          obj[$(this).attr('id')] = $(this).val();
+          if ($(this).attr('type') === 'checkbox') {
+            obj[$(this).attr('id')] = $(this).prop('checked');
+          } else {
+            obj[$(this).attr('id')] = $(this).val();
+          }
         });
         callback(obj);
       }
@@ -44,14 +42,14 @@
 
     <style>
       .danfoss-logo {
-        width: 200px;
-        margin: 20px auto;
+        width: 180px;
         display: block;
+        margin: 20px auto;
       }
       .headline {
-        font-size: 1.6rem;
         text-align: center;
-        margin-bottom: 1rem;
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
       }
     </style>
   </head>
@@ -62,35 +60,37 @@
       <div class="headline translate">Danfoss Ally Cloud Adapter</div>
 
       <div class="row">
-        <div class="col s12 m6 input-field">
-          <input id="apiKey" type="text" class="value" />
+        <div class="input-field col s12 m6">
+          <input type="text" id="apiKey" class="value" />
           <label for="apiKey" class="translate">API Key (Client ID)</label>
         </div>
 
-        <div class="col s12 m6 input-field">
-          <input id="apiSecret" type="password" class="value" />
+        <div class="input-field col s12 m6">
+          <input type="password" id="apiSecret" class="value" />
           <label for="apiSecret" class="translate">API Secret (Client Secret)</label>
         </div>
       </div>
 
       <div class="row">
-        <div class="col s12 m6 input-field">
-          <input id="tokenUrl" type="text" class="value" />
+        <div class="input-field col s12 m6">
+          <input type="text" id="tokenUrl" class="value" />
           <label for="tokenUrl" class="translate">Token URL (OAuth2)</label>
         </div>
-        <div class="col s12 m6 input-field">
-          <input id="apiBaseUrl" type="text" class="value" />
+
+        <div class="input-field col s12 m6">
+          <input type="text" id="apiBaseUrl" class="value" />
           <label for="apiBaseUrl" class="translate">API Base URL</label>
         </div>
       </div>
 
       <div class="row">
-        <div class="col s12 m6 input-field">
-          <input id="scope" type="text" class="value" />
+        <div class="input-field col s12 m6">
+          <input type="text" id="scope" class="value" />
           <label for="scope" class="translate">Scope (optional)</label>
         </div>
-        <div class="col s12 m6 input-field">
-          <input id="pollingInterval" type="number" min="15" class="value" />
+
+        <div class="input-field col s12 m6">
+          <input type="number" id="pollingInterval" min="15" class="value" />
           <label for="pollingInterval" class="translate">Polling Interval (s)</label>
         </div>
       </div>
