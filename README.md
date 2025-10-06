@@ -32,10 +32,10 @@ Configure under **Instances → danfoss-ally → Settings**:
 | **Polling Interval** | Interval in seconds (default: `60`) |
 
 ### Example Configuration
-API Key:      mxqNgoRTnWYSWMG01Oo4wpTxwjS6SyXyMcY1ih02irIBsOPW
+API Key:      mxqNgoRTnWYSWMG01Oo4wpTxwjS6SyXyMcY1ih
 API Secret:   [your secret]
 Token URL:    https://api.danfoss.com/oauth2/token
-API Base URL: https://api.danfoss.com/ally
+API Base URL: https://api.danfoss.com/all
 Polling:      600
 
 ---
