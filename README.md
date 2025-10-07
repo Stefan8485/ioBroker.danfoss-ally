@@ -1,4 +1,5 @@
-# ioBroker.danfoss-ally
+# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.1-blue)
+
 
 Cloud adapter for **Danfoss Ally™** – using **OAuth2 (Client Credentials)**.  
 Reads temperature, humidity, valve position, and battery data for all devices in your Ally account.
