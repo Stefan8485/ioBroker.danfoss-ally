@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "title": "Danfoss Ally Cloud Adapter",
     "titleLang": {
       "en": "Danfoss Ally Cloud Adapter",
@@ -12,6 +12,10 @@
       "de": "Verbindet ioBroker mit der Danfoss Ally™ Cloud API (OAuth2). Liest Temperatur-, Feuchte-, Ventil- und Batteriedaten aller Geräte."
     },
     "news": {
+      "0.2.1": {
+        "en": "Fixed value scaling for °C and % (0.1 → 1.0), improved stability and logs",
+        "de": "Skalierung der Werte für °C und % korrigiert (0.1 → 1.0), Stabilität und Logging verbessert"
+      },
       "0.2.0": {
         "en": "Added automatic token refresh, value scaling (°C / %), and improved device state mapping.",
         "de": "Automatische Token-Aktualisierung, Skalierung der Werte (°C / %), verbesserte Statuszuordnung."
