@@ -13,8 +13,20 @@
     "@iobroker/adapter-core": "^3.0.0",
     "axios": "^1.7.2"
   },
-  "keywords": ["ioBroker", "Danfoss", "Ally", "SmartHome", "Heating", "Cloud"],
+  "keywords": [
+    "ioBroker",
+    "Danfoss",
+    "Ally",
+    "SmartHome",
+    "Heating",
+    "Cloud"
+  ],
   "engines": {
     "node": ">=16"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "mocha",
+    "prepublishOnly": "npm run lint && npm test"
   }
 }
