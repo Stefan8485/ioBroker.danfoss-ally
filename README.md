@@ -147,5 +147,5 @@ or install via ioBroker development tooling.
 
 ## ⚖️ License
 
-**GPL-3.0**  
+**GPL-3.0**  ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 Maintained by community contributors.
