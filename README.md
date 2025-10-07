@@ -104,15 +104,20 @@ Used Danfoss Ally endpoints:
 
 ## 📦 Changelog
 
+### v0.2.1
+- Fixed sensor scaling (°C / % values)
+- Improved stability and logging
+- Verified device state updates for all 13 devices
+
 ### v0.2.0
-- Added automatic token refresh  
-- Added scaling for °C / % values  
-- Improved logging and state creation  
-- Expanded unit & role mapping  
-- Device discovery and sensor updates verified  
+- Added automatic token refresh
+- Added scaling for °C / % values
+- Improved logging and state creation
+- Expanded unit & role mapping
+- Device discovery and sensor updates verified
 
 ### v0.1.0
-- Initial release with basic device detection and token handling  
+- Initial release with basic device detection and token handling
 
 ---
 
