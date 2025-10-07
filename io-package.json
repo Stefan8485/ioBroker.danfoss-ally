@@ -7,10 +7,18 @@
       "en": "Danfoss Ally Cloud Adapter",
       "de": "Danfoss Ally Cloud Adapter"
     },
+    "desc": {
+      "en": "Connects ioBroker to the Danfoss Ally™ Cloud API (OAuth2). Reads temperature, humidity, valve, and battery data for all devices.",
+      "de": "Verbindet ioBroker mit der Danfoss Ally™ Cloud API (OAuth2). Liest Temperatur-, Feuchte-, Ventil- und Batteriedaten aller Geräte."
+    },
     "news": {
+      "0.2.0": {
+        "en": "Added automatic token refresh, value scaling (°C / %), and improved device state mapping.",
+        "de": "Automatische Token-Aktualisierung, Skalierung der Werte (°C / %), verbesserte Statuszuordnung."
+      },
       "0.1.0": {
-        "en": "Initial version with OAuth2 token refresh and automatic device discovery.",
-        "de": "Erste Version mit OAuth2-Token-Erneuerung und automatischer Geräteerkennung."
+        "en": "Initial version with OAuth2 token handling and device discovery.",
+        "de": "Erste Version mit OAuth2-Token und Geräteerkennung."
       }
     },
     "license": "GPL-3.0",
@@ -18,7 +26,7 @@
     "readme": "https://github.com/Stefan8485/ioBroker.danfoss-ally/blob/main/README.md",
     "platform": "Javascript/Node.js",
     "main": "main.js",
-    "authors": ["Stefan Koch <stefan@koch-cabletec.com>"],
+    "authors": ["Stefan Koch <stefan8485@me.com>"],
     "enabled": true,
     "mode": "daemon",
     "icon": "danfoss.svg",
