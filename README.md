@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.1-blue)
+# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.2-blue)
 
 
 Cloud adapter for **Danfoss Ally™** – using **OAuth2 (Client Credentials)**.  
@@ -104,10 +104,14 @@ Used Danfoss Ally endpoints:
 
 ## 📦 Changelog
 
+### v0.2.2
+- Fixed sensors datas and states
+- Verified device state updates
+
 ### v0.2.1
 - Fixed sensor scaling (°C / % values)
 - Improved stability and logging
-- Verified device state updates for all 13 devices
+- Verified device state updates for all devices
 
 ### v0.2.0
 - Added automatic token refresh
