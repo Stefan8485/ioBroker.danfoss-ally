@@ -65,23 +65,28 @@ class DanfossAlly extends utils.Adapter {
         native: dev.raw,
       });
 
-      // Status abrufen – API liefert ihn direkt im Objekt
-      const statusArray = Array.isArray(dev.status) ? dev.status : [];
+      // ✅ funktioniert mit deinem aktuellen Datenformat
+      const status = dev.status || {};
 
-      for (const st of statusArray) {
-        const code = st.code;
-        let value = st.value;
+      for (const [code, rawValue] of Object.entries(status)) {
+        let value = rawValue;
+				 
+	   
 
-        // 🔁 Werte-Skalierung
+									 
+							 
+							 
+
+        // 🔁 Skalierung
         if (
           [
             'temp_current', 'temp_set', 'upper_temp', 'lower_temp',
             'at_home_setting', 'leaving_home_setting', 'pause_setting', 'holiday_setting'
           ].includes(code)
         ) {
-          value = value / 10; // Zehntelgrad → °C
+          value = value / 10;
         } else if (code === 'humidity_value') {
-          value = value / 10; // Zehntel-% → %
+          value = value / 10;
         }
 
         const type =
@@ -113,6 +118,7 @@ class DanfossAlly extends utils.Adapter {
     this.log.error(`❌ Error updating devices: ${err.message}`);
   }
 }
+
 
 
   /**
