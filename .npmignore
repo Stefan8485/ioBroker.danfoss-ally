@@ -1,0 +1,27 @@
+# Ignore development & metadata folders
+.github/
+.git/
+node_modules/
+tests/
+test/
+coverage/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs & caches
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Temporary build files
+*.tgz
+*.zip
+*.bak
+*.tmp
+
+# Local configs
+.env
+*.local
