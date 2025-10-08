@@ -36,7 +36,7 @@ class DanfossAlly extends utils.Adapter {
       // Polling-Intervall starten
       const interval = (pollingInterval || 60) * 1000;
       this.pollInterval = this.setInterval(() => this.updateDevices(), interval);
-      this.log.info(`⏱ Polling interval set to ${pollingInterval}s`);
+      this.log.info(`Polling interval set to ${pollingInterval}s`);
     } catch (err) {
       this.log.error(`❌ Adapter startup failed: ${err.message}`);
     }
@@ -65,19 +65,13 @@ class DanfossAlly extends utils.Adapter {
         native: dev.raw,
       });
 
-      // ✅ funktioniert mit deinem aktuellen Datenformat
+      // funktioniert mit aktuellen Datenformat
       const status = dev.status || {};
 
       for (const [code, rawValue] of Object.entries(status)) {
         let value = rawValue;
-				 
-	   
 
-									 
-							 
-							 
-
-        // 🔁 Skalierung
+        // Skalierung
         if (
           [
             'temp_current', 'temp_set', 'upper_temp', 'lower_temp',
@@ -113,9 +107,9 @@ class DanfossAlly extends utils.Adapter {
       }
     }
 
-    this.log.info(`✅ Updated ${devices.length} devices from Danfoss Ally Cloud.`);
+    this.log.info(`Updated ${devices.length} devices from Danfoss Ally Cloud.`);
   } catch (err) {
-    this.log.error(`❌ Error updating devices: ${err.message}`);
+    this.log.error(`Error updating devices: ${err.message}`);
   }
 }
 

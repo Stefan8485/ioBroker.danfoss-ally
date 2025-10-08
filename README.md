@@ -6,7 +6,7 @@ Reads temperature, humidity, valve position, and battery data for all devices in
 
 ---
 
-## 🔧 Features
+## Features
 
 - Connects ioBroker directly to the **Danfoss Ally Cloud API**  
 - Automatic **OAuth2 token refresh**  
@@ -17,7 +17,7 @@ Reads temperature, humidity, valve position, and battery data for all devices in
 
 ---
 
-## 🧱 Supported Devices
+## Supported Devices
 
 - Danfoss Icon2 RT (Room thermostats)  
 - Danfoss Icon2 Controller  
@@ -26,7 +26,7 @@ Reads temperature, humidity, valve position, and battery data for all devices in
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 Configure under **Instances → danfoss-ally → Settings**
 
@@ -50,7 +50,7 @@ Polling:      600
 
 ---
 
-## 📊 States
+## States
 
 For each discovered device, the adapter creates a channel:  
 `danfoss-ally.0.devices.<device_id>`
@@ -73,7 +73,7 @@ All temperature and humidity values are automatically converted from tenths to r
 
 ---
 
-## 🧠 Token Handling
+## Token Handling
 
 - Adapter uses **OAuth2 Client Credentials Flow**  
 - Automatically requests token on startup  
@@ -82,7 +82,7 @@ All temperature and humidity values are automatically converted from tenths to r
 
 ---
 
-## 🌐 API Endpoints
+## API Endpoints
 
 Used Danfoss Ally endpoints:
 
@@ -94,7 +94,7 @@ Used Danfoss Ally endpoints:
 
 ---
 
-## 🕒 Polling
+## Polling
 
 - Data is refreshed from the cloud periodically  
 - Default: every 60 seconds  
@@ -102,7 +102,7 @@ Used Danfoss Ally endpoints:
 
 ---
 
-## 📦 Changelog
+## Changelog
   
 ### v0.2.6
 - fixed io-package.json file
@@ -137,7 +137,7 @@ Used Danfoss Ally endpoints:
 
 ---
 
-## 📋 Example Log Output
+## Example Log Output
 
 ```
 🔄 Starting Danfoss Ally adapter...
@@ -150,7 +150,7 @@ Used Danfoss Ally endpoints:
 
 ---
 
-## 🧩 Development
+## Development
 
 ```
 npm i
@@ -161,7 +161,7 @@ or install via ioBroker development tooling.
 
 ---
 
-## ⚖️ License
+## License
 
 **GPL-3.0-or-later**  ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 Maintained by community contributors.
