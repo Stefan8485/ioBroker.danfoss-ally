@@ -2,31 +2,36 @@
   "name": "iobroker.danfoss-ally",
   "version": "0.2.6",
   "description": "ioBroker adapter for Danfoss Ally™ Cloud API (OAuth2)",
-  "author": "Community Contributors",
-  "license": "GPL-3.0",
+  "author": "Stefan Koch <stefan8485@me.com>",
+  "license": "GPL-3.0-or-later",
   "main": "main.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/Stefan8485/ioBroker.danfoss-ally"
   },
-  "dependencies": {
-    "@iobroker/adapter-core": "^3.0.0",
-    "axios": "^1.7.2"
-  },
   "keywords": [
     "ioBroker",
     "Danfoss",
     "Ally",
-    "SmartHome",
     "Heating",
+    "SmartHome",
     "Cloud"
   ],
+  "dependencies": {
+    "@iobroker/adapter-core": "^3.2.3",
+    "axios": "^1.7.2"
+  },
+  "devDependencies": {
+    "@iobroker/adapter-dev": "^1.1.0",
+    "eslint": "^8.57.0",
+    "mocha": "^10.4.0"
+  },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "scripts": {
     "lint": "eslint .",
     "test": "mocha",
-    "prepublishOnly": "npm run lint && npm test"
+    "release": "iobroker dev release"
   }
 }
