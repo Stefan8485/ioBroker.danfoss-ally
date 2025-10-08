@@ -104,7 +104,7 @@ Used Danfoss Ally endpoints:
 
 ## 📦 Changelog
   
-  ### v0.2.6
+### v0.2.6
 - fixed io-package.json file
 
 ### v0.2.5
@@ -163,5 +163,5 @@ or install via ioBroker development tooling.
 
 ## ⚖️ License
 
-**GPL-3.0**  ![license](https://img.shields.io/badge/license-GPL--3.0-green)
+**GPL-3.0-or-later**  ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 Maintained by community contributors.

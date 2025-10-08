@@ -9,7 +9,11 @@
           "type": "image",
           "src": "danfoss.svg",
           "style": { "height": "48px", "marginRight": "10px" },
-          "md": 2
+          "xs": 12,
+          "sm": 2,
+          "md": 2,
+          "lg": 1,
+          "xl": 1
         },
         "_title": {
           "type": "staticText",
@@ -19,16 +23,75 @@
             "fontWeight": "600",
             "marginTop": "10px"
           },
-          "md": 10
+          "xs": 12,
+          "sm": 10,
+          "md": 10,
+          "lg": 11,
+          "xl": 11
         }
       }
     },
-    "_spacer": { "type": "divider", "style": { "marginTop": 20 } },
-    "apiKey": { "type": "text", "label": "API Key (Client ID)", "md": 6 },
-    "apiSecret": { "type": "password", "label": "API Secret (Client Secret)", "md": 6 },
-    "tokenUrl": { "type": "text", "label": "Token URL (OAuth2)", "default": "https://api.danfoss.com/oauth2/token", "md": 6 },
-    "apiBaseUrl": { "type": "text", "label": "API Base URL", "default": "https://api.danfoss.com/ally/v1", "md": 6 },
-    "scope": { "type": "text", "label": "Scope (optional)", "md": 6 },
-    "pollingInterval": { "type": "number", "label": "Polling Interval (s)", "default": 60, "min": 15, "md": 6 }
+    "_divider": {
+      "type": "divider",
+      "style": { "marginTop": 20, "marginBottom": 10 }
+    },
+    "apiKey": {
+      "type": "text",
+      "label": "API Key (Client ID)",
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
+    "apiSecret": {
+      "type": "password",
+      "label": "API Secret (Client Secret)",
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
+    "tokenUrl": {
+      "type": "text",
+      "label": "Token URL (OAuth2)",
+      "default": "https://api.danfoss.com/oauth2/token",
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
+    "apiBaseUrl": {
+      "type": "text",
+      "label": "API Base URL",
+      "default": "https://api.danfoss.com/ally/v1",
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
+    "scope": {
+      "type": "text",
+      "label": "Scope (optional)",
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    },
+    "pollingInterval": {
+      "type": "number",
+      "label": "Polling Interval (s)",
+      "default": 60,
+      "min": 15,
+      "xs": 12,
+      "sm": 6,
+      "md": 6,
+      "lg": 4,
+      "xl": 4
+    }
   }
 }
