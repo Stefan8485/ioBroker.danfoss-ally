@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "title": "danfoss-ally cloud adapter",
     "titleLang": {
       "en": "danfoss-ally cloud adapter",
@@ -12,6 +12,10 @@
       "de": "Verbindet ioBroker mit der Danfoss Ally™ Cloud API (OAuth2). Liest Temperatur-, Feuchte-, Ventil- und Batteriedaten aller Geräte."
     },
     "news": {
+	  "0.2.10": {
+	  "en": "Translation and ioBroker fixing",
+	  "de": "Übersetzung angepasst und änderungen für ioBroker umgesetzt"
+	},
 	  "0.2.9": {
 	  "en": ".ignor files change",
 	  "de": ".ignor dateien angepasst"
@@ -65,18 +69,22 @@
       "Danfoss",
       "Ally",
       "Heating",
+	  "Thermostat",
+      "Humidity",
       "SmartHome",
       "Cloud"
     ],
-    "license": "GPL-3.0-or-later",
-    "licenseUrl": "https://www.gnu.org/licenses/gpl-3.0.html",
-    "platform": "Javascript/Node.js",
     "main": "main.js",
     "enabled": true,
-    "compact": true,
     "mode": "daemon",
-    "icon": "danfoss.svg",
-    "extIcon": "https://raw.githubusercontent.com/Stefan8485/ioBroker.danfoss-ally/main/admin/danfoss.svg",
+  "licenseInformation": {
+      "license": "GPL-3.0-or-later",
+      "url": "https://www.gnu.org/licenses/gpl-3.0.html"
+    },
+    "platform": "Javascript/Node.js",
+	 "compact": true,
+	"icon": "danfoss.png",
+    "extIcon": "https://raw.githubusercontent.com/Stefan8485/ioBroker.danfoss-ally/main/admin/danfoss.png",
     "readme": "https://github.com/Stefan8485/ioBroker.danfoss-ally/blob/main/README.md",
     "loglevel": "info",
     "type": "climate-control",
@@ -86,14 +94,15 @@
       "config": "json"
     },
     "messagebox": true,
+	"tier": 3,
 	"dependencies": [
 	  {
-		"js-controller": ">=5.0.19"
+		"js-controller": ">=6.0.11"
 	  },
-	  {
-		"admin": ">=6.17.14"
-	  }
 	]
+	"globalDependencies": [
+      { "admin": ">=6.17.14" }
+    ]
   },
   "native": {
     "apiKey": "",
@@ -103,6 +112,9 @@
     "scope": "",
     "pollingInterval": 600
   },
+  "protectedNative": ["apiKey", "apiSecret"],
+  "encryptedNative": ["apiSecret"],
+
   "objects": [],
   "instanceObjects": []
 }
