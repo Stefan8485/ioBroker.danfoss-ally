@@ -96,13 +96,11 @@
     "messagebox": true,
 	"tier": 3,
 	"dependencies": [
-	  {
-		"js-controller": ">=6.0.11"
-	  },
-	]
+	  { "js-controller": ">=6.0.11" }
+	],
 	"globalDependencies": [
-      { "admin": ">=6.17.14" }
-    ]
+	  { "admin": ">=6.17.14" }
+	]
   },
   "native": {
     "apiKey": "",
@@ -110,11 +108,10 @@
     "tokenUrl": "https://api.danfoss.com/oauth2/token",
     "apiBaseUrl": "https://api.danfoss.com/ally",
     "scope": "",
-    "pollingInterval": 600
+    "pollingInterval": 300
   },
   "protectedNative": ["apiKey", "apiSecret"],
   "encryptedNative": ["apiSecret"],
-
   "objects": [],
   "instanceObjects": []
 }

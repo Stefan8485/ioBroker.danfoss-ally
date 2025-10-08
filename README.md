@@ -45,7 +45,7 @@ API Key:      mxqNgoRTnWYSWMG01Oo4wpTxwjS6SyXyMcY1ih
 API Secret:   [your secret]
 Token URL:    https://api.danfoss.com/oauth2/token
 API Base URL: https://api.danfoss.com/ally
-Polling:      600
+Polling:      300
 ```
 
 ---
@@ -97,7 +97,7 @@ Used Danfoss Ally endpoints:
 ## Polling
 
 - Data is refreshed from the cloud periodically  
-- Default: every 60 seconds  
+- Default: every 300 seconds  
 - Configurable via adapter settings  
 
 ---
@@ -158,7 +158,7 @@ Used Danfoss Ally endpoints:
 ✅ Token acquired. Expires in ~3599 s
 📡 Found 13 devices, updating states...
 ✅ Updated 13 devices from Danfoss Ally Cloud.
-⏱ Polling interval set to 600 s
+⏱ Polling interval set to 300 s
 ```
 
 ---
