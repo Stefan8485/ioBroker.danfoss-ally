@@ -1,0 +1,31 @@
+# Node.js build artifacts
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+*.out
+*.gz
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor folders
+.idea/
+.vscode/
+
+# Coverage reports
+coverage/
+
+# Build artifacts
+dist/
+tmp/
+*.tgz
+*.zip
+
+# Env files
+.env
