@@ -2,84 +2,68 @@
   "common": {
     "name": "danfoss-ally",
     "version": "0.2.10",
-    "title": "danfoss-ally cloud adapter",
+    "title": "danfoss-ally cloud",
     "titleLang": {
-      "en": "danfoss-ally cloud adapter",
-      "de": "danfoss-ally cloud adapter"
+		"en": "danfoss-ally cloud",
+		"de": "danfoss-ally cloud"
+		"pt": "danfoss-ally cloud",
+		"it": "danfoss-ally cloud",
+		"nl": "danfoss-ally cloud",
+		"fr": "danfoss-ally cloud",
+		"es": "danfoss-ally cloud",
+		"pl": "danfoss-ally cloud",
+		"uk": "danfoss-ally cloud",
+		"ru": "danfoss-ally cloud",
+		"zh-cn": "danfoss-ally cloud"
     },
-    "desc": {
-      "en": "Connects ioBroker to the Danfoss Ally™ Cloud API (OAuth2). Reads temperature, humidity, valve, and battery data for all devices.",
-      "de": "Verbindet ioBroker mit der Danfoss Ally™ Cloud API (OAuth2). Liest Temperatur-, Feuchte-, Ventil- und Batteriedaten aller Geräte."
-    },
+	"desc": {
+	  "en": "Connects ioBroker to the Danfoss Ally Cloud API.",
+	  "de": "Verbindet ioBroker mit der Danfoss Ally Cloud API.",
+	  "ru": "Подключает ioBroker к облаку Danfoss Ally.",
+	  "fr": "Connecte ioBroker à l'API cloud Danfoss Ally.",
+	  "it": "Collega ioBroker al cloud Danfoss Ally.",
+	  "es": "Conecta ioBroker con la nube Danfoss Ally.",
+	  "pl": "Łączy ioBroker z chmurą Danfoss Ally.",
+	  "nl": "Verbindt ioBroker met de Danfoss Ally Cloud API.",
+	  "pt": "Conecta o ioBroker à nuvem Danfoss Ally.",
+	  "uk": "Підключає ioBroker до хмари Danfoss Ally.",
+	  "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
+	},
     "news": {
 	  "0.2.10": {
 	  "en": "Translation and ioBroker fixing",
 	  "de": "Übersetzung angepasst und änderungen für ioBroker umgesetzt"
-	},
+		},
 	  "0.2.9": {
 	  "en": ".ignor files change",
 	  "de": ".ignor dateien angepasst"
-	},
+		},
 	  "0.2.8": {
 	  "en": "fixed io-package.json file",
 	  "de": "io-Package.json file angepasst für adpater Check"
-	},
+		},
 	  "0.2.7": {
 	  "en": "Adapter added to ioBroker",
 	  "de": "Adapter zu ioBroker hinzugefügt"
-	},
-	  "0.2.6": {
-	  "en": "fixed io-package.json file",
-	  "de": "io-Package.json file angepasst für adpater Check"
-	},
-      "0.2.5": {
-        "en": "Adapter added to ioBroker Dev Portal.",
-        "de": "Adapter im ioBroker Dev Portal hinzugefügt."
-      },
-      "0.2.4": {
-        "en": "Added ioBroker update support and improved release metadata.",
-        "de": "ioBroker-Update-Unterstützung hinzugefügt und Metadaten verbessert."
-      },
-      "0.2.3": {
-        "en": "Improved token handling and fixed login configuration issues.",
-        "de": "Verbesserte Token-Verarbeitung und behobene Probleme bei der Login-Konfiguration."
-      },
-      "0.2.2": {
-        "en": "Minor bugfixes and performance improvements.",
-        "de": "Kleinere Fehlerkorrekturen und Performanceverbesserungen."
-      },
-      "0.2.1": {
-        "en": "Fixed value scaling for °C and %, improved stability and logs.",
-        "de": "Skalierung der Werte für °C und % korrigiert, Stabilität und Logging verbessert."
-      },
-      "0.2.0": {
-        "en": "Added automatic token refresh, value scaling (°C / %), and improved device state mapping.",
-        "de": "Automatische Token-Aktualisierung, Skalierung der Werte (°C / %), verbesserte Statuszuordnung."
-      },
-      "0.1.0": {
-        "en": "Initial version with OAuth2 token handling and device discovery.",
-        "de": "Erste Version mit OAuth2-Token und Geräteerkennung."
-      }
+		}
     },
     "authors": [
       "Stefan Koch <stefan8485@me.com>"
     ],
     "keywords": [
-      "ioBroker",
       "Danfoss",
       "Ally",
       "Heating",
 	  "Thermostat",
       "Humidity",
-      "SmartHome",
       "Cloud"
     ],
-    "main": "main.js",
     "enabled": true,
     "mode": "daemon",
-  "licenseInformation": {
+	"licenseInformation": {
       "license": "GPL-3.0-or-later",
-      "url": "https://www.gnu.org/licenses/gpl-3.0.html"
+      "link": "https://www.gnu.org/licenses/gpl-3.0.html",
+	  "type": "free"
     },
     "platform": "Javascript/Node.js",
 	 "compact": true,
@@ -99,7 +83,7 @@
 	  { "js-controller": ">=6.0.11" }
 	],
 	"globalDependencies": [
-	  { "admin": ">=6.17.14" }
+	  { "admin": ">=7.6.17" }
 	]
   },
   "native": {
@@ -110,8 +94,8 @@
     "scope": "",
     "pollingInterval": 300
   },
-  "protectedNative": ["apiKey", "apiSecret"],
-  "encryptedNative": ["apiSecret"],
-  "objects": [],
-  "instanceObjects": []
+	"protectedNative": ["apiKey", "apiSecret"],
+	"encryptedNative": ["apiKey", "apiSecret"],
+	"objects": [],
+	"instanceObjects": []
 }
