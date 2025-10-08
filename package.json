@@ -1,6 +1,6 @@
 {
   "name": "iobroker.danfoss-ally",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "ioBroker adapter for Danfoss Ally™ Cloud API (OAuth2)",
   "author": "Stefan Koch <stefan8485@me.com>",
   "license": "GPL-3.0-or-later",
@@ -17,6 +17,14 @@
     "SmartHome",
     "Cloud"
   ],
+  "files": [
+  "main.js",
+  "lib/",
+  "admin/",
+  "io-package.json",
+  "package.json",
+  "README.md"
+  ]
   "dependencies": {
     "@iobroker/adapter-core": "^3.2.3",
     "axios": "^1.7.2"
