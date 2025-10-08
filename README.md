@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.7-blue)
+# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.8-blue)
 
 
 Cloud adapter for **Danfoss Ally™** – using **OAuth2 (Client Credentials)**.  
@@ -103,7 +103,10 @@ Used Danfoss Ally endpoints:
 ---
 
 ## Changelog
-  
+
+### v0.2.8
+- fixed io-package.json file
+
 ### v0.2.6
 - Added Adpater in IoBroker
 
