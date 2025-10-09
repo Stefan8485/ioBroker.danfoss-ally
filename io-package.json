@@ -74,9 +74,9 @@
     "type": "climate-control",
     "connectionType": "cloud",
     "dataSource": "poll",
-    "adminUI": [
-      { "config": "json" }
-    ],
+    "adminUI": {
+      "config": "json"
+    },
     "messagebox": true,
 	"tier": 3,
 	"dependencies": [
