@@ -5,7 +5,7 @@
     "title": "danfoss-ally cloud",
     "titleLang": {
 		"en": "danfoss-ally cloud",
-		"de": "danfoss-ally cloud"
+		"de": "danfoss-ally cloud",
 		"pt": "danfoss-ally cloud",
 		"it": "danfoss-ally cloud",
 		"nl": "danfoss-ally cloud",
@@ -74,9 +74,9 @@
     "type": "climate-control",
     "connectionType": "cloud",
     "dataSource": "poll",
-    "adminUI": {
-      "config": "json"
-    },
+    "adminUI": [
+      { "config": "json" }
+    ],
     "messagebox": true,
 	"tier": 3,
 	"dependencies": [
