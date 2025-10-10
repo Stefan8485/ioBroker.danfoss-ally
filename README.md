@@ -1,5 +1,6 @@
 # ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.10-blue)
 
+[![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
 Cloud adapter for **Danfoss Ally™** – using **OAuth2 (Client Credentials)**.  
 Reads temperature, humidity, valve position, and battery data for all devices in your Ally account.
@@ -178,3 +179,4 @@ or install via ioBroker development tooling.
 
 **GPL-3.0-or-later**  ![license](https://img.shields.io/badge/license-GPL--3.0-green)
 Maintained by community contributors.
+Copyright (c) 2025 Stefan Koch <stefan8485@me.com>
