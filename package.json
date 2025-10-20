@@ -42,6 +42,6 @@
   "scripts": {
     "lint": "eslint .",
     "test": "mocha",
-    "release": "npm run lint && npm test"
+	"release": "npm version patch && git push --follow-tags"
   }
 }

@@ -1,35 +1,38 @@
-name: Create ioBroker Release
+name: Release Adapter
 
 on:
   push:
     tags:
-      - 'v*'   # Trigger only on version tags (e.g. v0.2.5)
+      - "v*.*.*"
 
 jobs:
-  build:
+  release:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 22
+          registry-url: "https://registry.npmjs.org/"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
-      - name: Build adapter (if build script exists)
-        run: npm run build --if-present
+      - name: Test build
+        run: npm run test --if-present
 
-      - name: Create GitHub Release
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: ${{ github.ref_name }}
           generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Print release success
-        run: echo "✅ GitHub release created successfully!"

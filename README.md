@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.10-blue)
+# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.10-blue)  [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)  [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields&data=d)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
 [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
@@ -108,46 +108,6 @@ Used Danfoss Ally endpoints:
 ### 0.2.10
 - Translation and ioBroker fixing
 - Repository compliance fixes (adminUI schema, translations, license info, protected/encrypted settings).
-
-### v0.2.9
-- .ignor change
-
-### 0.2.8
-- fixed io-package.json file
-
-### 0.2.6
-- Added Adpater in IoBroker
-
-### 0.2.6
-- fixed io-package.json file
-
-### 0.2.5
-- Added Adpater in IoBroker Dev portal
-
-### 0.2.4
-- Added ioBroker update support and improved release metadata
-
-### 0.2.3
-- Improved token handling and fixed login configuration issues
-
-### 0.2.2
-- Fixed sensors datas and states
-- Verified device state updates
-
-### 0.2.1
-- Fixed sensor scaling (°C / % values)
-- Improved stability and logging
-- Verified device state updates for all devices
-
-### 0.2.0
-- Added automatic token refresh
-- Added scaling for °C / % values
-- Improved logging and state creation
-- Expanded unit & role mapping
-- Device discovery and sensor updates verified
-
-### 0.1.0
-- Initial release with basic device detection and token handling
 
 ---
 
