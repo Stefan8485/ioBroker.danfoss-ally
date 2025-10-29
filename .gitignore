@@ -29,3 +29,6 @@ tmp/
 
 # Env files
 .env
+
+#ignore .commitinfo created by ioBroker release script
+.commitinfo
