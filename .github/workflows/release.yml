@@ -1,13 +1,21 @@
 name: Release Adapter
 
 on:
+  release:
+    types: [published]
   push:
     tags:
       - "v*.*.*"
 
+
+permissions:
+  contents: read         
+  id-token: write       
+
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -26,13 +34,20 @@ jobs:
       - name: Test build
         run: npm run test --if-present
 
-      - name: Publish to npm
-        run: npm publish --access public
+      - name: Verify npm metadata
+        run: |
+          node -v
+          npm -v
+          npm pack --dry-run
+
+      - name: Publish to npm (Trusted Publishing + provenance)
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+        run: |
+          npm publish --access public --provenance
 
       - name: Create GitHub release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true

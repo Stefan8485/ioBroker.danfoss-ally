@@ -1,5 +1,5 @@
 <h1>ioBroker.danfoss-ally</h1>
-<p><strong>Version 0.2.10 (October 2025)</strong></p>
+<p><strong>Version 0.2.11 (October 2025)</strong></p>
 
 <p>Cloud adapter for <strong>Danfoss Ally™</strong> using OAuth2 Client Credentials.</p>
 <p>Reads temperature, humidity, valve position, and battery for all devices in your Danfoss Ally account.</p>
@@ -23,17 +23,87 @@
 <tr><td>Polling Interval</td><td>Default 60 seconds</td></tr>
 </table>
 
-<h2>States</h2>
-<p>For each discovered device, a channel is created under <code>danfoss-ally.0.devices.&lt;device_id&gt;</code>.</p>
+<h2>States & Writing</h2>
+<p>Channel per device: <code>danfoss-ally.0.&lt;device_id&gt;.*</code></p>
+
+<h3>Read</h3>
+<table>
+  <tr><th>State</th><th>Meaning</th><th>Unit</th></tr>
+  <tr><td>temp_current</td><td>Current temperature</td><td>°C</td></tr>
+  <tr><td>humidity_value</td><td>Humidity</td><td>%</td></tr>
+  <tr><td>battery_percentage</td><td>Battery</td><td>%</td></tr>
+  <tr><td>mode</td><td>Mode</td><td>–</td></tr>
+  <tr><td>work_state / output_status / fault</td><td>Status/Fault</td><td>–</td></tr>
+  <tr><td>upper_temp / lower_temp</td><td>Limits</td><td>°C</td></tr>
+</table>
+
+<h3>Write (individual)</h3>
+<table>
+  <tr><th>State</th><th>Expected</th></tr>
+  <tr><td>temp_set</td><td>Target temperature in °C (0.5 steps) — adapter scales ×10</td></tr>
+  <tr><td>manual_mode_fast</td><td>Alias for <code>temp_set</code></td></tr>
+  <tr><td>at_home_setting / leaving_home_setting / pause_setting / holiday_setting</td><td>Corresponding preset temperature</td></tr>
+  <tr><td>mode</td><td><code>manual</code>, <code>at_home</code>, <code>leaving_home</code>, <code>pause</code>, <code>holiday</code>, <code>auto</code></td></tr>
+  <tr><td>child_lock</td><td><code>true</code> / <code>false</code></td></tr>
+  <tr><td>SetpointChangeSource</td><td><code>Externally</code> or <code>schedule</code></td></tr>
+</table>
+<p><strong>Important:</strong> The adapter does <em>not</em> switch the mode automatically when you set setpoints. Control this explicitly in Blockly/scripts.</p>
+
+<h2>Synchronization Logic</h2>
 <ul>
-  <li><b>temp_current</b> – Current temperature (°C)</li>
-  <li><b>temp_set</b> – Target temperature (°C)</li>
-  <li><b>humidity_value</b> – Relative humidity (%)</li>
-  <li><b>battery_percentage</b> – Battery level (%)</li>
-  <li><b>mode</b> – Operating mode (auto, holiday, manual...)</li>
-  <li><b>work_state</b> – Heating state</li>
-  <li><b>fault</b> – Error code</li>
-  <li><b>output_status</b> – Valve/output status</li>
+  <li>Anti-Race (5 s) — skip one poll immediately after a local write</li>
+  <li>Hold (1 min) — protects local writes from being overwritten</li>
+  <li>Lag-Suppress (15 s) — temporarily discards stale cloud values</li>
+  <li>Soft-Refresh (~1.5 s) — refreshes only affected codes plus <code>temp_current</code></li>
+</ul>
+
+<h2>Logging</h2>
+<p>The adapter is chatty on <em>debug</em> so you can diagnose timing and API quirks. Here’s what the key messages mean and when they appear.</p>
+
+<ul>
+  <li><strong><code>ack=true</code> updates</strong> — shown at <em>debug</em> only.<br>
+      These are state changes that came from the cloud (or from the adapter itself after a write). They do <em>not</em> trigger outgoing writes.</li>
+
+  <li><strong>HOLD / MATCH / SUPPRESS</strong> — all <em>debug</em>, harmless, for timing diagnostics:
+    <ul>
+      <li><code>HOLD &lt;dev.code&gt;: keep local=… vs cloud=…</code> — a recent local write is being protected from being overwritten by a poll during the hold window.</li>
+      <li><code>MATCH &lt;dev.code&gt;: cloud≈local → drop hold</code> — cloud caught up with the locally written value; protection is removed.</li>
+      <li><code>SUPPRESS &lt;dev.code&gt;: skip cloud=…</code> — within the short lag suppress window, we ignore a possibly stale cloud value to avoid flicker.</li>
+    </ul>
+  </li>
+
+  <li><strong>Send / Retry path</strong> — <em>debug</em>:
+    <ul>
+      <li><code>WRITE …</code> — you (or a script) wrote to an ioBroker state with <code>ack=false</code>.</li>
+      <li><code>SEND dev: code=value</code> — the adapter sends exactly one command to the Danfoss API.</li>
+      <li><code>OK dev: code</code> — API accepted the command.</li>
+      <li><code>ERR dev: code =&gt; HTTP 400/401 … ⇒ retrying once…</code> — transient error (e.g. missing header or expired token). The adapter automatically refreshes the token and retries once.</li>
+      <li><code>(after retry)</code> — the retry succeeded; no action needed.</li>
+    </ul>
+  </li>
+
+  <li><strong>State updates</strong>:
+    <ul>
+      <li><code>SET dev.code = … (ack)</code> — adapter updated the ioBroker state because the value changed (from poll or soft refresh).</li>
+      <li><code>ack=true update ignored</code> — an incoming change with <code>ack=true</code> was intentionally ignored for writing (it’s a read-back, not a user write).</li>
+    </ul>
+  </li>
+
+  <li><strong>Poll summary</strong> — <em>info</em>:
+    <ul>
+      <li><code>Updated N devices. Changed=X, Skipped=Y, Held=Z</code><br>
+          <strong>Changed</strong> = states actually updated, <strong>Skipped</strong> = no-op because value was unchanged, <strong>Held</strong> = states intentionally not updated due to a recent local write.</li>
+      <li><code>Found …, updating states…</code> — poll cycle started.</li>
+      <li><code>Skipping poll (anti-race …)</code> — immediately after a local write, one poll is skipped to avoid races.</li>
+    </ul>
+  </li>
+</ul>
+
+<h3>Log levels & recommendations</h3>
+<ul>
+  <li>Run daily with <strong>info</strong> or <strong>warn</strong> to keep logs clean.</li>
+  <li>Enable <strong>debug</strong> temporarily when you need to trace timing (HOLD/MATCH/SUPPRESS) or API behavior.</li>
+  <li><strong>HTTP 400/401</strong> on send are printed at <em>debug</em>. A single automatic retry is performed; if that succeeds you’ll see <code>(after retry)</code>. Only persistent failures will show as warnings or errors.</li>
 </ul>
 
 <h2>Token Handling</h2>
@@ -46,35 +116,24 @@
 <h2>API Endpoints</h2>
 <ul>
   <li>POST /oauth2/token</li>
-  <li>GET /devices</li>
-  <li>GET /devices/{id}/status</li>
-  <li>GET /devices/{id}</li>
-  <li>POST /devices/{id}/commands (future)</li>
+  <li>GET /{id}</li>
+  <li>GET /{id}/status</li>
+  <li>POST /{id}/commands (future)</li>
 </ul>
 
 <h2>Example Log Output</h2>
 <pre>
-🔄 Starting Danfoss Ally adapter...
-🔑 Refreshing OAuth2 token...
-✅ Token acquired. Expires in ~3599 s
-📡 Found 13 devices, updating states...
-✅ Updated 13 devices from Danfoss Ally Cloud.
-⏱ Polling interval set to 300 s
+Starting Danfoss Ally adapter...
+Refreshing OAuth2 token...
+Token acquired. Expires in ~3599 s
+Found 13 devices, updating states...
+Updated 13 devices from Danfoss Ally Cloud.
+Polling interval set to 300 s
 </pre>
 
 <h2>Changelog</h2>
+<p><b>0.2.11</b> – Added full write support for Danfoss Ally.</p>
 <p><b>0.2.10</b> – Translation and ioBroker fixing.</p>
-<p><b>0.2.9</b> – .ignor change.</p>
-<p><b>0.2.8</b> – fixed io-package.json file.</p>
-<p><b>0.2.7</b> – Added Adpater in IoBroker.</p>
-<p><b>0.2.6</b> – fixed io-package.json file.</p>
-<p><b>0.2.5</b> – Added Adpater in IoBroker Dev portal.</p>
-<p><b>0.2.4</b> – Added ioBroker update support and improved release metadata.</p>
-<p><b>0.2.3</b> – Login changed.</p>
-<p><b>0.2.2</b> – Fixed sensors datas and states.</p>
-<p><b>0.2.1</b> – Fixed sensor scaling (°C / % values).</p>
-<p><b>0.2.0</b> – Added token refresh, scaling, and improved logging.</p>
-<p><b>0.1.0</b> – Initial release with basic device detection.</p>
 
 <h2>License</h2>
-<p>GPL-3.0<br>Maintained by community contributors.</p>
+<p>Danfoss Ally Adapter for ioBroker</br>(c) 2025 Stefan Koch</br>MIT License – see LICENSE file for details</p>

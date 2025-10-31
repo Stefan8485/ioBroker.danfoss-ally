@@ -1,9 +1,9 @@
 {
   "name": "iobroker.danfoss-ally",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "ioBroker adapter for Danfoss Ally™ Cloud API (OAuth2)",
   "author": "Stefan Koch <stefan8485@me.com>",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "main": "main.js",
   "repository": {
     "type": "git",
@@ -14,27 +14,27 @@
     "Danfoss",
     "Ally",
     "Heating",
-	"Thermostat",
+    "Thermostat",
     "Humidity",
     "SmartHome",
     "Cloud"
   ],
   "files": [
-  "main.js",
-  "lib/",
-  "admin/",
-  "io-package.json",
-  "package.json",
-  "README.md"
+    "main.js",
+    "lib/",
+    "admin/",
+    "io-package.json",
+    "package.json",
+    "README.md"
   ],
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
     "axios": "^1.7.2"
   },
-"devDependencies": {
-  "@iobroker/adapter-dev": "^1.5.0",
-  "@iobroker/testing": "^5.1.1",
-  "eslint": "^8.57.0"
+  "devDependencies": {
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/testing": "^5.1.1",
+    "eslint": "^8.57.0"
   },
   "engines": {
     "node": ">=20"
@@ -42,6 +42,12 @@
   "scripts": {
     "lint": "eslint .",
     "test": "mocha",
-	"release": "npm version patch && git push --follow-tags"
+    "release": "npm version patch && git push --follow-tags",
+    "translate": "translate-adapter",
+    "translate:check": "translate-adapter --check"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
   }
 }

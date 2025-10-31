@@ -1,0 +1,57 @@
+name: Test Adapter
+
+on:
+  push:
+    branches:
+      - main
+      - dev/**
+  pull_request:
+
+jobs:
+  test:
+    name: Test (Node ${{ matrix.node }} · ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18.x, 20.x]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+          key: ${{ runner.os }}-node-${{ matrix.node }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node }}-npm-
+
+      - name: Install dependencies
+        run: npm ci
+
+      # JSON-Validierung: typische Fehler (Kommas etc.)
+      - name: Validate JSON (package.json, io-package.json)
+        run: |
+          npx jsonlint -q package.json
+          npx jsonlint -q io-package.json
+
+      # Übersetzungen prüfen (falls Script vorhanden)
+      - name: Translation check
+        run: npm run translate:check --if-present
+
+      # Lint (falls eingerichtet)
+      - name: Lint
+        run: npm run lint --if-present
+
+      # Unit-/Integrationstests (falls vorhanden)
+      - name: Tests
+        run: npm test --if-present

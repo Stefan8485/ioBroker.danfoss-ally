@@ -1,39 +1,60 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.10",
-    "title": "danfoss-ally cloud",
+    "version": "0.2.11",
     "titleLang": {
-		"en": "danfoss-ally cloud",
-		"de": "danfoss-ally cloud",
-		"pt": "danfoss-ally cloud",
-		"it": "danfoss-ally cloud",
-		"nl": "danfoss-ally cloud",
-		"fr": "danfoss-ally cloud",
-		"es": "danfoss-ally cloud",
-		"pl": "danfoss-ally cloud",
-		"uk": "danfoss-ally cloud",
-		"ru": "danfoss-ally cloud",
-		"zh-cn": "danfoss-ally cloud"
+      "en": "danfoss-ally cloud",
+      "de": "danfoss-ally cloud",
+      "pt": "danfoss-ally cloud",
+      "it": "danfoss-ally cloud",
+      "nl": "danfoss-ally cloud",
+      "fr": "danfoss-ally cloud",
+      "es": "danfoss-ally cloud",
+      "pl": "danfoss-ally cloud",
+      "uk": "danfoss-ally cloud",
+      "ru": "danfoss-ally cloud",
+      "zh-cn": "danfoss-ally cloud"
     },
-	"desc": {
-	  "en": "Connects ioBroker to the Danfoss Ally Cloud API.",
-	  "de": "Verbindet ioBroker mit der Danfoss Ally Cloud API.",
-	  "ru": "Подключает ioBroker к облаку Danfoss Ally.",
-	  "fr": "Connecte ioBroker à l'API cloud Danfoss Ally.",
-	  "it": "Collega ioBroker al cloud Danfoss Ally.",
-	  "es": "Conecta ioBroker con la nube Danfoss Ally.",
-	  "pl": "Łączy ioBroker z chmurą Danfoss Ally.",
-	  "nl": "Verbindt ioBroker met de Danfoss Ally Cloud API.",
-	  "pt": "Conecta o ioBroker à nuvem Danfoss Ally.",
-	  "uk": "Підключає ioBroker до хмари Danfoss Ally.",
-	  "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
-	},
+    "desc": {
+      "en": "Connects ioBroker to the Danfoss Ally Cloud API.",
+      "de": "Verbindet ioBroker mit der Danfoss Ally Cloud API.",
+      "ru": "Подключает ioBroker к облаку Danfoss Ally.",
+      "fr": "Connecte ioBroker à l'API cloud Danfoss Ally.",
+      "it": "Collega ioBroker al cloud Danfoss Ally.",
+      "es": "Conecta ioBroker con la nube Danfoss Ally.",
+      "pl": "Łączy ioBroker z chmurą Danfoss Ally.",
+      "nl": "Verbindt ioBroker met de Danfoss Ally Cloud API.",
+      "pt": "Conecta o ioBroker à nuvem Danfoss Ally.",
+      "uk": "Підключає ioBroker до хмари Danfoss Ally.",
+      "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
+    },
     "news": {
-	  "0.2.10": {
-	  "en": "Translation and ioBroker fixing",
-	  "de": "Übersetzung angepasst und änderungen für ioBroker umgesetzt"
-		}
+      "0.2.11": {
+        "en": "Added full write support for Danfoss Ally",
+        "de": "Vollständige Schreibunterstützung für Danfoss Ally hinzugefügt",
+        "ru": "Добавлена ​​полная поддержка записи для Danfoss Ally.",
+        "pt": "Adicionado suporte completo de gravação para Danfoss Ally",
+        "nl": "Volledige schrijfondersteuning toegevoegd voor Danfoss Ally",
+        "fr": "Ajout d'une prise en charge complète en écriture pour Danfoss Ally",
+        "it": "Aggiunto il supporto di scrittura completo per Danfoss Ally",
+        "es": "Se agregó soporte completo de escritura para Danfoss Ally.",
+        "pl": "Dodano pełną obsługę zapisu dla Danfoss Ally",
+        "uk": "Додано повну підтримку запису для Danfoss Ally",
+        "zh-cn": "添加了对 Danfoss Ally 的完整写入支持"
+      },
+      "0.2.10": {
+        "en": "Translation and ioBroker fixing",
+        "de": "Übersetzung angepasst und änderungen für ioBroker umgesetzt",
+        "ru": "Перевод и исправление ioBroker",
+        "pt": "Tradução e correção do ioBroker",
+        "nl": "Vertaling en ioBroker-fixing",
+        "fr": "Traduction et correction d'ioBroker",
+        "it": "Traduzione e correzione di ioBroker",
+        "es": "Traducción y reparación de ioBroker",
+        "pl": "Tłumaczenie i naprawa ioBrokera",
+        "uk": "Переклад і виправлення ioBroker",
+        "zh-cn": "翻译和 ioBroker 修复"
+      }
     },
     "authors": [
       "Stefan Koch <stefan8485@me.com>"
@@ -42,20 +63,20 @@
       "Danfoss",
       "Ally",
       "Heating",
-	  "Thermostat",
+      "Thermostat",
       "Humidity",
       "Cloud"
     ],
     "enabled": true,
     "mode": "daemon",
-	"licenseInformation": {
-      "license": "GPL-3.0-or-later",
-      "link": "https://www.gnu.org/licenses/gpl-3.0.html",
-	  "type": "free"
+    "licenseInformation": {
+      "license": "MIT",
+      "link": "https://opensource.org/licenses/MIT",
+      "type": "free"
     },
     "platform": "Javascript/Node.js",
-	 "compact": true,
-	"icon": "danfoss.png",
+    "compact": true,
+    "icon": "danfoss.png",
     "extIcon": "https://raw.githubusercontent.com/Stefan8485/ioBroker.danfoss-ally/main/admin/danfoss.png",
     "readme": "https://github.com/Stefan8485/ioBroker.danfoss-ally/blob/main/README.md",
     "loglevel": "info",
@@ -65,14 +86,17 @@
     "adminUI": {
       "config": "json"
     },
-    "messagebox": true,
-	"tier": 3,
-	"dependencies": [
-	  { "js-controller": ">=6.0.11" }
-	],
-	"globalDependencies": [
-	  { "admin": ">=7.6.17" }
-	]
+    "tier": 3,
+    "dependencies": [
+      {
+        "js-controller": ">=6.0.11"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=7.6.17"
+      }
+    ]
   },
   "native": {
     "apiKey": "",
@@ -82,8 +106,14 @@
     "scope": "",
     "pollingInterval": 300
   },
-	"protectedNative": ["apiKey", "apiSecret"],
-	"encryptedNative": ["apiKey", "apiSecret"],
-	"objects": [],
-	"instanceObjects": []
+  "protectedNative": [
+    "apiKey",
+    "apiSecret"
+  ],
+  "encryptedNative": [
+    "apiKey",
+    "apiSecret"
+  ],
+  "objects": [],
+  "instanceObjects": []
 }

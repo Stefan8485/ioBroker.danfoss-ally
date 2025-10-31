@@ -1,9 +1,9 @@
 {
-  "Danfoss Ally Cloud": "Danfoss Ally Cloud",
-  "API Key (Client ID)": "API Key (Client ID)",
-  "API Secret (Client Secret)": "API Secret (Client Secret)",
-  "Token URL (OAuth2)": "Token URL (OAuth2)",
-  "API Base URL": "API Base URL",
-  "Scope (optional)": "Scope (optional)",
-  "Polling Interval (s)": "Polling Interval (s)"
+  "API Base URL": "API 基址",
+  "API Key (Client ID)": "API 密钥（客户端 ID）",
+  "API Secret (Client Secret)": "API 秘密（客户端秘密）",
+  "Danfoss Ally Cloud": "丹佛斯盟友云",
+  "Polling Interval (s)": "轮询间隔（秒）",
+  "Scope (optional)": "范围（可选）",
+  "Token URL (OAuth2)": "令牌 URL (OAuth2)"
 }
