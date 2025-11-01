@@ -1,36 +1,34 @@
-# Node.js build artifacts
+# === ioBroker Adapter Standard ===
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-
-# Logs
-logs/
-*.log
-*.out
-*.gz
-
-# OS files
+package-lock.json
+.idea/
+.vscode/
 .DS_Store
 Thumbs.db
 
-# Editor folders
-.idea/
-.vscode/
-
-# Coverage reports
+# === Build / Lint / Tools ===
+.eslintcache
+.prettiercache
 coverage/
-
-# Build artifacts
 dist/
 tmp/
+temp/
+.cache/
+logs/
+*.log
 *.tgz
 *.zip
-
-# Env files
+.idea/
+.vscode/
 .env
 eslint.config.mjs
 prettier.config.mjs
 
-# Commit
+# === Git / Metadata ===
 .commitinfo
+*.orig
+*.rej
+*.patch

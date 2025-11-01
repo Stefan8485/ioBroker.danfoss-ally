@@ -2,7 +2,9 @@ name: Test Adapter
 
 on:
   push:
-    branches: [ main, "dev/**" ]
+    branches:
+      - main
+      - "dev/**"
   pull_request:
 
 permissions:
@@ -11,7 +13,7 @@ permissions:
 
 jobs:
   test:
-    name: Test (Node ${{ matrix.node }} · ${ { matrix.os } })
+    name: Test (Node ${{ matrix.node }} · ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -33,7 +35,8 @@ jobs:
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ matrix.node }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-node-${{ matrix.node }}-npm-
+          restore-keys: |
+            ${{ runner.os }}-node-${{ matrix.node }}-npm-
 
       - name: Install
         run: npm ci
