@@ -54,7 +54,7 @@
   },
   "overrides": {
     "yargs": "17.7.2"
-  }
+  },
   "publishConfig": {
     "access": "public",
     "provenance": true
