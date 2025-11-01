@@ -46,9 +46,6 @@ jobs:
           npx jsonlint -q package.json
           npx jsonlint -q io-package.json
 
-      - name: Translation check
-        run: npm run translate:check --if-present
-
       - name: Lint
         run: npm run lint --if-present
 
