@@ -24,8 +24,6 @@ logs/
 .idea/
 .vscode/
 .env
-eslint.config.mjs
-prettier.config.mjs
 
 # === Git / Metadata ===
 .commitinfo
