@@ -47,7 +47,7 @@ jobs:
           npx jsonlint -q io-package.json
 
       - name: Lint
-        run: npm run lint --if-present
+        run: npm run lint
 
       - name: Tests
-        run: npm test --if-present
+        run: npm test
