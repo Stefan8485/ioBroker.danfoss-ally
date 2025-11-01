@@ -52,6 +52,9 @@
     "translate": "translate-adapter",
     "translate:check": "translate-adapter --check"
   },
+  "overrides": {
+    "yargs": "17.7.2"
+  }
   "publishConfig": {
     "access": "public",
     "provenance": true
