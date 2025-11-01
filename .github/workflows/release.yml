@@ -4,20 +4,17 @@ on:
   release:
     types: [published]
   push:
-    tags:
-      - "v*.*.*"
-
+    tags: ["v*.*.*"]
 
 permissions:
-  contents: read         
-  id-token: write       
+  contents: read
+  id-token: write
 
 jobs:
   release:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
@@ -25,26 +22,19 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           registry-url: "https://registry.npmjs.org/"
 
-      - name: Install dependencies
+      - name: Install
         run: npm ci
 
-      - name: Test build
-        run: npm run test --if-present
-
-      - name: Verify npm metadata
-        run: |
-          node -v
-          npm -v
-          npm pack --dry-run
+      - name: Verify npm pack (dry run)
+        run: npm pack --dry-run
 
       - name: Publish to npm (Trusted Publishing + provenance)
         env:
           NPM_CONFIG_PROVENANCE: true
-        run: |
-          npm publish --access public --provenance
+        run: npm publish --access public --provenance
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2

@@ -2,14 +2,16 @@ name: Test Adapter
 
 on:
   push:
-    branches:
-      - main
-      - dev/**
+    branches: [ main, "dev/**" ]
   pull_request:
+
+permissions:
+  contents: read
+  id-token: write
 
 jobs:
   test:
-    name: Test (Node ${{ matrix.node }} · ${{ matrix.os }})
+    name: Test (Node ${{ matrix.node }} · ${ { matrix.os } })
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -18,7 +20,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Use Node.js ${{ matrix.node }}
@@ -29,29 +31,23 @@ jobs:
       - name: Cache npm
         uses: actions/cache@v4
         with:
-          path: |
-            ~/.npm
+          path: ~/.npm
           key: ${{ runner.os }}-node-${{ matrix.node }}-npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-${{ matrix.node }}-npm-
+          restore-keys: ${{ runner.os }}-node-${{ matrix.node }}-npm-
 
-      - name: Install dependencies
+      - name: Install
         run: npm ci
 
-      # JSON-Validierung: typische Fehler (Kommas etc.)
-      - name: Validate JSON (package.json, io-package.json)
+      - name: Validate JSON
         run: |
           npx jsonlint -q package.json
           npx jsonlint -q io-package.json
 
-      # Übersetzungen prüfen (falls Script vorhanden)
       - name: Translation check
         run: npm run translate:check --if-present
 
-      # Lint (falls eingerichtet)
       - name: Lint
         run: npm run lint --if-present
 
-      # Unit-/Integrationstests (falls vorhanden)
       - name: Tests
         run: npm test --if-present

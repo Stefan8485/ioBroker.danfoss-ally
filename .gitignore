@@ -29,6 +29,8 @@ tmp/
 
 # Env files
 .env
+eslint.config.mjs
+prettier.config.mjs
 
 # Commit
 .commitinfo
