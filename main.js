@@ -10,106 +10,101 @@ const TEMP_EPS = 0.05; // °C-Toleranz zum Abgleich mit Cloud
 
 // Typ-/Einheits-Hints halten die Objekte stabil (kein Typflip bei wechselnden API-Rückgaben)
 const TYPE_HINTS = new Map([
-            // Zahlen (°C)
-            ['temp_current', 'number'],
-            ['temp_set', 'number'],
-            ['upper_temp', 'number'],
-            ['lower_temp', 'number'],
-            ['at_home_setting', 'number'],
-            ['leaving_home_setting', 'number'],
-            ['pause_setting', 'number'],
-            ['holiday_setting', 'number'],
-            ['manual_mode_fast', 'number'],
+    // Zahlen (°C)
+    ['temp_current', 'number'],
+    ['temp_set', 'number'],
+    ['upper_temp', 'number'],
+    ['lower_temp', 'number'],
+    ['at_home_setting', 'number'],
+    ['leaving_home_setting', 'number'],
+    ['pause_setting', 'number'],
+    ['holiday_setting', 'number'],
+    ['manual_mode_fast', 'number'],
 
-            // Zahlen (%)
-            ['humidity_value', 'number'],
-            ['battery_percentage', 'number'],
+    // Zahlen (%)
+    ['humidity_value', 'number'],
+    ['battery_percentage', 'number'],
 
-            // Bool
-            ['child_lock', 'boolean'],
+    // Bool
+    ['child_lock', 'boolean'],
 
-            // Strings (Enums/Text)
-            ['mode', 'string'],
-            ['SetpointChangeSource', 'string'],
-            ['work_state', 'string'],
-            ['output_status', 'string'],
-            ['fault', 'string'],
-
-        ]);
+    // Strings (Enums/Text)
+    ['mode', 'string'],
+    ['SetpointChangeSource', 'string'],
+    ['work_state', 'string'],
+    ['output_status', 'string'],
+    ['fault', 'string'],
+]);
 
 const UNIT_HINTS = new Map([
-            ['temp_current', '°C'],
-            ['temp_set', '°C'],
-            ['upper_temp', '°C'],
-            ['lower_temp', '°C'],
-            ['at_home_setting', '°C'],
-            ['leaving_home_setting', '°C'],
-            ['pause_setting', '°C'],
-            ['holiday_setting', '°C'],
-            ['humidity_value', '%'],
-            ['battery_percentage', '%'],
-            ['manual_mode_fast', '°C'],
-        ]);
-
-const TEMP_CODES = new Set([
-            'temp_set',
-            'at_home_setting',
-            'leaving_home_setting',
-            'pause_setting',
-            'holiday_setting',
-            'lower_temp',
-            'upper_temp',
-        ]);
+    ['temp_current', '°C'],
+    ['temp_set', '°C'],
+    ['upper_temp', '°C'],
+    ['lower_temp', '°C'],
+    ['at_home_setting', '°C'],
+    ['leaving_home_setting', '°C'],
+    ['pause_setting', '°C'],
+    ['holiday_setting', '°C'],
+    ['humidity_value', '%'],
+    ['battery_percentage', '%'],
+    ['manual_mode_fast', '°C'],
+]);
 
 // Beschreibbare States
 const WRITEABLE_CODES = new Set([
-            'temp_set', // manuelle Solltemperatur
-            'manual_mode_fast', // UI-write erlaubt, wird auf temp_set gemappt
-            'at_home_setting',
-            'leaving_home_setting',
-            'pause_setting',
-            'holiday_setting',
-            'mode',
-            'child_lock',
-            'SetpointChangeSource',
-        ]);
+    'temp_set', // manuelle Solltemperatur
+    'manual_mode_fast', // UI-write erlaubt, wird auf temp_set gemappt
+    'at_home_setting',
+    'leaving_home_setting',
+    'pause_setting',
+    'holiday_setting',
+    'mode',
+    'child_lock',
+    'SetpointChangeSource',
+]);
 
 /** ------- Alias-/Normalisierung ------- */
 const CODE_ALIASES = new Map([
-            ['pause_settings', 'pause_setting'],
-            ['pause', 'pause_setting'], // falls jemand nur "pause" schreibt
-            ['setpoint_change_source', 'SetpointChangeSource'],
-            ['setpointchangesource', 'SetpointChangeSource'],
-            ['setpoint_change', 'SetpointChangeSource'],
-        ]);
+    ['pause_settings', 'pause_setting'],
+    ['pause', 'pause_setting'], // falls jemand nur "pause" schreibt
+    ['setpoint_change_source', 'SetpointChangeSource'],
+    ['setpointchangesource', 'SetpointChangeSource'],
+    ['setpoint_change', 'SetpointChangeSource'],
+]);
 
 const MODE_ALIASES = new Map([
-            ['holiday_sat', 'holiday'], // Spezialfall → „holiday“
-            ['manual', 'manual'],
-            ['leaving_home', 'leaving_home'],
-            ['pause', 'pause'],
-            ['at_home', 'at_home'],
-            ['holiday', 'holiday'],
-            ['auto', 'auto'],
-        ]);
+    ['holiday_sat', 'holiday'], // Spezialfall → „holiday“
+    ['manual', 'manual'],
+    ['leaving_home', 'leaving_home'],
+    ['pause', 'pause'],
+    ['at_home', 'at_home'],
+    ['holiday', 'holiday'],
+    ['auto', 'auto'],
+]);
 
 function normalizeCode(codeRaw) {
     const c = String(codeRaw || '').trim();
     const lower = c.toLowerCase();
-    if (CODE_ALIASES.has(lower))
+    if (CODE_ALIASES.has(lower)) {
         return CODE_ALIASES.get(lower);
+    }
     return c;
 }
 
 function normalizeMode(modeRaw) {
     const m = String(modeRaw || '').trim();
     const lower = m.toLowerCase();
-    if (MODE_ALIASES.has(lower))
+    if (MODE_ALIASES.has(lower)) {
         return MODE_ALIASES.get(lower);
+    }
     return m;
 }
 
-/** ------- DEBUG HELPERS ------- */
+/**
+ * ------- DEBUG HELPERS -------
+ *
+ * @param err
+ */
 function errDetails(err) {
     const status = err?.response?.status;
     const data = err?.response?.data;
@@ -121,14 +116,18 @@ function dval(v) {
 
 function coerceTypeByHint(code, value) {
     const hint = TYPE_HINTS.get(code);
-    if (!hint)
+    if (!hint) {
         return value;
-    if (hint === 'number')
+    }
+    if (hint === 'number') {
         return typeof value === 'number' ? value : Number(value);
-    if (hint === 'boolean')
-        return typeof value === 'boolean' ? value : (value === 'true' || value === true || value === 1);
-    if (hint === 'string')
+    }
+    if (hint === 'boolean') {
+        return typeof value === 'boolean' ? value : value === 'true' || value === true || value === 1;
+    }
+    if (hint === 'string') {
         return value != null ? String(value) : '';
+    }
     return value;
 }
 
@@ -136,8 +135,15 @@ function coerceTypeByHint(code, value) {
 function isSameVal(code, a, b) {
     if (typeof a === 'number' && typeof b === 'number') {
         const tempish = [
-            'temp_current', 'temp_set', 'upper_temp', 'lower_temp',
-            'at_home_setting', 'leaving_home_setting', 'pause_setting', 'holiday_setting', 'manual_mode_fast'
+            'temp_current',
+            'temp_set',
+            'upper_temp',
+            'lower_temp',
+            'at_home_setting',
+            'leaving_home_setting',
+            'pause_setting',
+            'holiday_setting',
+            'manual_mode_fast',
         ];
         return tempish.includes(code) ? Math.abs(a - b) <= TEMP_EPS : a === b;
     }
@@ -149,7 +155,7 @@ class DanfossAlly extends utils.Adapter {
     constructor(options = {}) {
         super({
             ...options,
-            name: 'danfoss-ally'
+            name: 'danfoss-ally',
         });
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
@@ -177,13 +183,16 @@ class DanfossAlly extends utils.Adapter {
             return;
         }
 
-        this.api = new DanfossAPI({
-            apiKey,
-            apiSecret,
-            tokenUrl,
-            apiBaseUrl,
-            scope
-        }, this.log);
+        this.api = new DanfossAPI(
+            {
+                apiKey,
+                apiSecret,
+                tokenUrl,
+                apiBaseUrl,
+                scope,
+            },
+            this.log,
+        );
 
         try {
             await this.api.ensureToken();
@@ -192,12 +201,15 @@ class DanfossAlly extends utils.Adapter {
             const MAX_POLL_SEC = 86400;
 
             let intervalSec = Number(pollingInterval || 60);
-            if (!Number.isFinite(intervalSec))
+            if (!Number.isFinite(intervalSec)) {
                 intervalSec = 60;
-            if (intervalSec < MIN_POLL_SEC)
+            }
+            if (intervalSec < MIN_POLL_SEC) {
                 intervalSec = MIN_POLL_SEC;
-            if (intervalSec > MAX_POLL_SEC)
+            }
+            if (intervalSec > MAX_POLL_SEC) {
                 intervalSec = MAX_POLL_SEC;
+            }
 
             this.pollInterval = this.setInterval(() => this.updateDevices(), intervalSec * 1000);
             this.log.info(`Polling interval set to ${intervalSec}s`);
@@ -236,8 +248,8 @@ class DanfossAlly extends utils.Adapter {
     async updateDevices() {
         const pollStartedAt = Date.now();
         let changed = 0,
-        skipped = 0,
-        held = 0;
+            skipped = 0,
+            held = 0;
 
         try {
             // Anti-Race: direkt nach einem lokalen Write kurz nicht pollen
@@ -263,7 +275,7 @@ class DanfossAlly extends utils.Adapter {
                 await this.setObjectNotExistsAsync(devPath, {
                     type: 'device',
                     common: {
-                        name: dev.name || 'Device'
+                        name: dev.name || 'Device',
                     },
                     native: dev.raw || {},
                 });
@@ -278,8 +290,9 @@ class DanfossAlly extends utils.Adapter {
                 }
 
                 for (const [codeRaw, rawValue] of pairs) {
-                    if (typeof codeRaw !== 'string')
+                    if (typeof codeRaw !== 'string') {
                         continue;
+                    }
 
                     // Code normalisieren + sanitizen
                     const code = this.sanitizeId(normalizeCode(codeRaw));
@@ -287,14 +300,22 @@ class DanfossAlly extends utils.Adapter {
                     // Skalierung in reale Einheiten
                     let value = rawValue;
                     const tempLike = [
-                        'temp_current', 'temp_set', 'upper_temp', 'lower_temp',
-                        'at_home_setting', 'leaving_home_setting', 'pause_setting', 'holiday_setting',
-                        'manual_mode_fast'
+                        'temp_current',
+                        'temp_set',
+                        'upper_temp',
+                        'lower_temp',
+                        'at_home_setting',
+                        'leaving_home_setting',
+                        'pause_setting',
+                        'holiday_setting',
+                        'manual_mode_fast',
                     ];
-                    if (tempLike.includes(code) && typeof value === 'number')
+                    if (tempLike.includes(code) && typeof value === 'number') {
                         value = value / 10;
-                    if (code === 'humidity_value' && typeof value === 'number')
+                    }
+                    if (code === 'humidity_value' && typeof value === 'number') {
                         value = value / 10;
+                    }
 
                     // Typ stabilisieren (verhindert Type-Flips)
                     value = coerceTypeByHint(code, value);
@@ -351,7 +372,7 @@ class DanfossAlly extends utils.Adapter {
                     if (pending && pollStartedAt < pending.until) {
                         const same =
                             (typeof value === 'number' && Math.abs(value - Number(pending.val)) <= TEMP_EPS) ||
-                        (value === pending.val);
+                            value === pending.val;
 
                         if (same) {
                             // Cloud hat den lokalen Wert erreicht -> Hold auflösen
@@ -360,7 +381,9 @@ class DanfossAlly extends utils.Adapter {
                         } else {
                             // Lokalen Wert weiterhin schützen
                             held++;
-                            this.log.debug(`HOLD ${key}: keep local=${dval(pending.val)} vs cloud=${dval(value)} (until ${new Date(pending.until).toISOString()})`);
+                            this.log.debug(
+                                `HOLD ${key}: keep local=${dval(pending.val)} vs cloud=${dval(value)} (until ${new Date(pending.until).toISOString()})`,
+                            );
                             continue; // cloud nicht anwenden
                         }
                     }
@@ -371,7 +394,9 @@ class DanfossAlly extends utils.Adapter {
                         const cur = await this.getStateAsync(id);
                         const same = cur && cur.val !== undefined && isSameVal(code, cur.val, value);
                         if (!same) {
-                            this.log.debug(`SUPPRESS ${key}: skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (pollStartedAt - lastWriteTs)}ms (recent local write)`);
+                            this.log.debug(
+                                `SUPPRESS ${key}: skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (pollStartedAt - lastWriteTs)}ms (recent local write)`,
+                            );
                             continue;
                         }
                     }
@@ -385,7 +410,7 @@ class DanfossAlly extends utils.Adapter {
                         this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
                         await this.setStateAsync(id, {
                             val: value,
-                            ack: true
+                            ack: true,
                         });
                     }
                 }
@@ -397,48 +422,72 @@ class DanfossAlly extends utils.Adapter {
         }
     }
 
-    /** HOLD + Zeitstempel nach erfolgreichem Write setzen */
+    /**
+     * HOLD + Zeitstempel nach erfolgreichem Write setzen
+     *
+     * @param deviceId
+     * @param code
+     * @param localVal
+     */
     _noteWrite(deviceId, code, localVal) {
         const key = `${deviceId}.${code}`;
         const now = Date.now();
         this._pending.set(key, {
             val: localVal,
-            until: now + WRITE_HOLD_MS
+            until: now + WRITE_HOLD_MS,
         });
         this._recentWriteTs.set(key, now);
         this._lastWriteAt = now;
         this.log.debug(`HOLD  ${key} = ${dval(localVal)} for ${Math.round(WRITE_HOLD_MS / 1000)}s`);
     }
 
-    /** Soft-Refresh: nur ausgewählte Codes eines Geräts nachladen */
+    /**
+     * Soft-Refresh: nur ausgewählte Codes eines Geräts nachladen
+     *
+     * @param deviceId
+     * @param onlyCodes
+     */
     async _softRefreshOne(deviceId, onlyCodes = null) {
         try {
             const raw = await this.api.getDeviceStatus(deviceId);
-            const statusArray = Array.isArray(raw?.result) ? raw.result
-                 : Array.isArray(raw?.status) ? raw.status
-                 : Array.isArray(raw) ? raw
-                 : [];
+            const statusArray = Array.isArray(raw?.result)
+                ? raw.result
+                : Array.isArray(raw?.status)
+                  ? raw.status
+                  : Array.isArray(raw)
+                    ? raw
+                    : [];
 
-            const devPath = `${devId}`;
+            const devPath = `${deviceId}`;
             for (const entry of statusArray) {
                 let code = normalizeCode(entry.code);
-                if (!code)
+                if (!code) {
                     continue;
-              
+                }
+
                 code = this.sanitizeId(code);
-                if (onlyCodes && !onlyCodes.has(code))
+                if (onlyCodes && !onlyCodes.has(code)) {
                     continue;
+                }
 
                 let value = entry.value;
                 const tempLike = [
-                    'temp_current', 'temp_set', 'upper_temp', 'lower_temp',
-                    'at_home_setting', 'leaving_home_setting', 'pause_setting',
-                    'holiday_setting', 'manual_mode_fast'
+                    'temp_current',
+                    'temp_set',
+                    'upper_temp',
+                    'lower_temp',
+                    'at_home_setting',
+                    'leaving_home_setting',
+                    'pause_setting',
+                    'holiday_setting',
+                    'manual_mode_fast',
                 ];
-                if (tempLike.includes(code) && typeof value === 'number')
+                if (tempLike.includes(code) && typeof value === 'number') {
                     value = value / 10;
-                if (code === 'humidity_value' && typeof value === 'number')
+                }
+                if (code === 'humidity_value' && typeof value === 'number') {
                     value = value / 10;
+                }
                 value = coerceTypeByHint(code, value);
 
                 const id = `${devPath}.${code}`;
@@ -449,7 +498,7 @@ class DanfossAlly extends utils.Adapter {
                 if (pending && Date.now() < pending.until) {
                     const same =
                         (typeof value === 'number' && Math.abs(value - Number(pending.val)) <= TEMP_EPS) ||
-                    (value === pending.val);
+                        value === pending.val;
                     if (same) {
                         this.log.debug(`MATCH ${key}: cloud≈local → drop hold`);
                         this._pending.delete(key);
@@ -465,7 +514,9 @@ class DanfossAlly extends utils.Adapter {
                     const cur = await this.getStateAsync(id);
                     const same = cur && cur.val !== undefined && isSameVal(code, cur.val, value);
                     if (!same) {
-                        this.log.debug(`SUPPRESS ${key} (soft): skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (Date.now() - lastWriteTs)}ms`);
+                        this.log.debug(
+                            `SUPPRESS ${key} (soft): skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (Date.now() - lastWriteTs)}ms`,
+                        );
                         continue;
                     }
                 }
@@ -475,7 +526,7 @@ class DanfossAlly extends utils.Adapter {
                     this.log.debug(`SET   ${deviceId}.${code} = ${dval(value)} (ack, soft refresh)`);
                     await this.setStateAsync(id, {
                         val: value,
-                        ack: true
+                        ack: true,
                     });
                 }
             }
@@ -490,17 +541,24 @@ class DanfossAlly extends utils.Adapter {
         setTimeout(() => this._softRefreshOne(deviceId, codes), 1500);
     }
 
-    /** Hilfsfunktion: einen einzelnen Befehl senden (mit Debug + Retry) */
+    /**
+     * Hilfsfunktion: einen einzelnen Befehl senden (mit Debug + Retry)
+     *
+     * @param deviceId
+     * @param codeRaw
+     * @param value
+     */
     async sendOne(deviceId, codeRaw, value) {
         const code = normalizeCode(codeRaw);
         this.log.debug(`SEND ${deviceId}: ${code}=${dval(value)}`);
         try {
             await this.api.sendCommand(deviceId, {
-                commands: [{
+                commands: [
+                    {
                         code,
-                        value
-                    }
-                ]
+                        value,
+                    },
+                ],
             });
             this.log.debug(`OK   ${deviceId}: ${code}`);
         } catch (err) {
@@ -515,11 +573,12 @@ class DanfossAlly extends utils.Adapter {
                 try {
                     await this.api.ensureToken();
                     await this.api.sendCommand(deviceId, {
-                        commands: [{
+                        commands: [
+                            {
                                 code,
-                                value
-                            }
-                        ]
+                                value,
+                            },
+                        ],
                     });
                     this.log.debug(`OK   ${deviceId}: ${code} (after retry)`);
                     return;
@@ -535,11 +594,15 @@ class DanfossAlly extends utils.Adapter {
     /**
      * Writes aus ioBroker entgegennehmen und an die Cloud senden
      * – ohne automatische Sequenzen (volle Kontrolle pro Code)
+     *
+     * @param id
+     * @param state
      */
     async onStateChange(id, state) {
         // 1) Safety
-        if (!state)
+        if (!state) {
             return;
+        }
 
         // 2) ack=true: nur Debug (kein Write auslösen)
         if (state.ack) {
@@ -552,14 +615,16 @@ class DanfossAlly extends utils.Adapter {
 
         try {
             // id-Form: "danfoss-ally.0.<deviceId>.<code>"
-            const nsPrefix = this.namespace + '.'; // z.B. "danfoss-ally.0."
-            if (!id.startsWith(nsPrefix))
+            const nsPrefix = `${this.namespace}.`; // z.B. "danfoss-ally.0."
+            if (!id.startsWith(nsPrefix)) {
                 return;
+            }
 
             const rel = id.slice(nsPrefix.length); // => "<deviceId>.<code>[.<sub>...]"
             const [deviceIdRaw, rawCode] = rel.split('.');
-            if (!deviceIdRaw || !rawCode)
+            if (!deviceIdRaw || !rawCode) {
                 return;
+            }
 
             const deviceId = this.sanitizeId(deviceIdRaw);
             const code = this.sanitizeId(normalizeCode(rawCode));
@@ -570,25 +635,29 @@ class DanfossAlly extends utils.Adapter {
             }
 
             // Helper: Temp vorbereiten (Clamp an lower/upper + ×10)
-            const prepareTempValue10 = async(v) => {
+            const prepareTempValue10 = async v => {
                 let target = Number(v);
-                if (!Number.isFinite(target))
+                if (!Number.isFinite(target)) {
                     return null;
+                }
 
                 const lower = await this.getStateAsync(`${deviceId}.lower_temp`);
                 const upper = await this.getStateAsync(`${deviceId}.upper_temp`);
 
                 const before = target;
-                if (lower && typeof lower.val === 'number')
+                if (lower && typeof lower.val === 'number') {
                     target = Math.max(target, lower.val);
-                if (upper && typeof upper.val === 'number')
+                }
+                if (upper && typeof upper.val === 'number') {
                     target = Math.min(target, upper.val);
+                }
 
                 const v10 = Math.round(target * 10);
                 this.log.debug(
-                    `PREP ${deviceId}: input=${dval(v)}${before !== target ? ` clamped→${dval(target)}` : ''} send×10=${v10}` + 
-                    `${lower && typeof lower.val === 'number' ? ` (lower=${dval(lower.val)})` : ''}` + 
-`${upper && typeof upper.val === 'number' ? ` (upper=${dval(upper.val)})` : ''}`);
+                    `PREP ${deviceId}: input=${dval(v)}${before !== target ? ` clamped→${dval(target)}` : ''} send×10=${v10}` +
+                        `${lower && typeof lower.val === 'number' ? ` (lower=${dval(lower.val)})` : ''}` +
+                        `${upper && typeof upper.val === 'number' ? ` (upper=${dval(upper.val)})` : ''}`,
+                );
                 return v10;
             };
 
@@ -605,11 +674,11 @@ class DanfossAlly extends utils.Adapter {
                 await this.sendOne(deviceId, 'temp_set', v10);
                 await this.setStateAsync(`${deviceId}.temp_set`, {
                     val: Number(val),
-                    ack: true
+                    ack: true,
                 });
                 await this.setStateAsync(`${deviceId}.manual_mode_fast`, {
                     val: Number(val),
-                    ack: true
+                    ack: true,
                 });
                 this._noteWrite(deviceId, 'temp_set', Number(val));
 
@@ -629,7 +698,7 @@ class DanfossAlly extends utils.Adapter {
                 await this.sendOne(deviceId, 'temp_set', v10);
                 await this.setStateAsync(`${deviceId}.temp_set`, {
                     val: Number(val),
-                    ack: true
+                    ack: true,
                 });
                 this._noteWrite(deviceId, 'temp_set', Number(val));
 
@@ -649,7 +718,7 @@ class DanfossAlly extends utils.Adapter {
                 await this.sendOne(deviceId, code, v10);
                 await this.setStateAsync(`${deviceId}.${code}`, {
                     val: Number(val),
-                    ack: true
+                    ack: true,
                 });
                 this._noteWrite(deviceId, code, Number(val));
 
@@ -660,7 +729,7 @@ class DanfossAlly extends utils.Adapter {
 
             // Kindersicherung
             if (code === 'child_lock') {
-                const boolVal = (val === true || val === 'true' || val === 1);
+                const boolVal = val === true || val === 'true' || val === 1;
                 try {
                     await this.sendOne(deviceId, 'child_lock', boolVal ? 1 : 0);
                 } catch {
@@ -668,7 +737,7 @@ class DanfossAlly extends utils.Adapter {
                 }
                 await this.setStateAsync(`${deviceId}.child_lock`, {
                     val: !!boolVal,
-                    ack: true
+                    ack: true,
                 });
                 this._noteWrite(deviceId, 'child_lock', !!boolVal);
 
@@ -683,7 +752,7 @@ class DanfossAlly extends utils.Adapter {
                 await this.sendOne(deviceId, 'mode', next);
                 await this.setStateAsync(`${deviceId}.mode`, {
                     val: next,
-                    ack: true
+                    ack: true,
                 });
                 this._noteWrite(deviceId, 'mode', next);
 
@@ -701,7 +770,7 @@ class DanfossAlly extends utils.Adapter {
                 await this.sendOne(deviceId, 'SetpointChangeSource', src);
                 await this.setStateAsync(`${deviceId}.SetpointChangeSource`, {
                     val: src,
-                    ack: true
+                    ack: true,
                 });
                 this._noteWrite(deviceId, 'SetpointChangeSource', src);
 
@@ -721,35 +790,38 @@ class DanfossAlly extends utils.Adapter {
 
     mapRole(code) {
         const writeableTemp = new Set([
-                    'temp_set',
-                    'manual_mode_fast',
-                    'at_home_setting',
-                    'leaving_home_setting',
-                    'pause_setting',
-                    'holiday_setting',
-                ]);
+            'temp_set',
+            'manual_mode_fast',
+            'at_home_setting',
+            'leaving_home_setting',
+            'pause_setting',
+            'holiday_setting',
+        ]);
 
-        const roTemp = new Set([
-                    'temp_current',
-                    'lower_temp',
-                    'upper_temp',
-                ]);
+        const roTemp = new Set(['temp_current', 'lower_temp', 'upper_temp']);
 
-        if (writeableTemp.has(code))
+        if (writeableTemp.has(code)) {
             return 'level.temperature';
-        if (roTemp.has(code))
+        }
+        if (roTemp.has(code)) {
             return 'value.temperature';
+        }
 
-        if (code === 'humidity_value')
+        if (code === 'humidity_value') {
             return 'value.humidity';
-        if (code === 'battery_percentage')
+        }
+        if (code === 'battery_percentage') {
             return 'value.battery';
-        if (code === 'child_lock')
+        }
+        if (code === 'child_lock') {
             return 'switch';
-        if (code === 'mode')
+        }
+        if (code === 'mode') {
             return 'text';
-        if (code === 'work_state' || code === 'output_status' || code === 'fault')
+        }
+        if (code === 'work_state' || code === 'output_status' || code === 'fault') {
             return 'text';
+        }
 
         return 'state';
     }
@@ -773,18 +845,19 @@ class DanfossAlly extends utils.Adapter {
 
     onUnload(callback) {
         try {
-            if (this.pollInterval)
+            if (this.pollInterval) {
                 clearInterval(this.pollInterval);
+            }
             this.log.info('Adapter stopped');
             callback();
-        } catch (e) {
-            callback();
+        } catch (err) {
+            this.log.error(`onStateChange error: ${err.message}`);
         }
     }
 }
 
 if (require.main !== module) {
-    module.exports = (options) => new DanfossAlly(options);
+    module.exports = options => new DanfossAlly(options);
 } else {
     new DanfossAlly();
 }
