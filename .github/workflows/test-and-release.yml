@@ -89,12 +89,8 @@ jobs:
 
       - name: Publish package to npm
         env:
-          # NPM_TOKEN im Repo als Secret setzen (für klassisches Token-Release)
-          # Bei Trusted Publishing kann dieser Block abweichen.
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          npm whoami
-          npm publish
+          NPM_CONFIG_PROVENANCE: true
+        run: npm publish --provenance --access public
 
       - name: Create Github Release
         uses: actions/create-release@v1
