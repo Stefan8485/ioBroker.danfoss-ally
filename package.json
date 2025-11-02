@@ -48,7 +48,6 @@
   "scripts": {
     "lint": "eslint .",
     "test": "node -e \"console.log('no tests yet')\"",
-    "test:integration": "node -e \"console.log('no integration tests')\"",
     "release": "npm version patch && git push --follow-tags",
     "translate": "translate-adapter"
   },

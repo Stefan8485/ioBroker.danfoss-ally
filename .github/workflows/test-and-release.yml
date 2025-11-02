@@ -5,20 +5,19 @@ on:
     branches:
       - '*'
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-**'
+      # normal versions
+      - 'v?[0-9]+.[0-9]+.[0-9]+'
+      # pre-releases
+      - 'v?[0-9]+.[0-9]+.[0-9]+-**'
   pull_request: {}
 
+# Cancel previous runs for same ref when new commits arrive
 concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  id-token: write
-
 jobs:
-  # Lint & schnelle Checks NUR unter Node 22 (hier sind devDependencies ok)
+  # Fast checks before the matrix runs
   check-and-lint:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     runs-on: ubuntu-latest
@@ -26,36 +25,28 @@ jobs:
       - uses: ioBroker/testing-action-check@v1
         with:
           node-version: '22.x'
-          install - command: 'npm install'
+          # If your repo cannot use `npm ci`, uncomment:
+          # install-command: 'npm install'
           lint: true
-      - name: Allow warnings
-        run: echo "ESLint warnings are OK (no fatal errors)"
 
-  # Adapter-Tests auf Ubuntu & Windows, Node 18/20/22
-   adapter-tests:
+  # Adapter tests on supported Node versions and OSes
+  adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        node-version: [18.x, 20.x, 22.x]
+        node-version: [20.x, 22.x]
         os: [ubuntu-latest, windows-latest]
     steps:
-      - name: Skip Node 18 (unsupported by deps)
-        if: startsWith(matrix.node-version, '18.')
-        run: |
-          echo "Skipping Node 18.x build – dependencies require >=20.11.0"
-          exit 0
-
       - uses: ioBroker/testing-action-adapter@v1
-        if: startsWith(matrix.node-version, '18.') == false
         with:
           node-version: ${{ matrix.node-version }}
           os: ${{ matrix.os }}
-          install-command: 'npm ci'
+          # If your repo cannot use `npm ci`, uncomment:
+          # install-command: 'npm install'
 
-
-  # Release auf NPM bei getaggten Commits (vX.Y.Z oder vX.Y.Z-rc.N)
+  # Publish to npm when a version tag is pushed
   deploy:
     needs: [check-and-lint, adapter-tests]
     if: |
@@ -63,14 +54,21 @@ jobs:
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+
+    # Required to create GitHub releases
     permissions:
       contents: write
       id-token: write
+
     steps:
       - uses: ioBroker/testing-action-deploy@v1
         with:
           node-version: '22.x'
+          # If your repo cannot use `npm ci`, uncomment:
+          # install-command: 'npm install'
           github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # Sentry is off for now; enable later if needed
           sentry: false
           # sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
           # sentry-project: "iobroker.danfoss-ally"
