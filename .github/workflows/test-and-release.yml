@@ -44,32 +44,51 @@ jobs:
 
     # Runs adapter tests on all supported node versions and OSes
     adapter-tests:
-        if: contains(github.event.head_commit.message, '[skip ci]') == false
+  if: contains(github.event.head_commit.message, '[skip ci]') == false
+  needs: [check-and-lint]
+  runs-on: ${{ matrix.os }}
+  strategy:
+    fail-fast: false
+    matrix:
+      node-version: [22.x]   # bewusst schlank halten; 24.x kannst du später ergänzen
+      os: [ubuntu-latest, windows-latest]
+  steps:
+    - uses: actions/checkout@v5
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+    - name: Install Dependencies
+      run: npm install
+    - name: Run local tests
+      run: npm test
+    # adapter-tests:
+        # if: contains(github.event.head_commit.message, '[skip ci]') == false
 
-        needs: [check-and-lint]
+        # needs: [check-and-lint]
 
-        runs-on: ubuntu-latest
+        # runs-on: ubuntu-latest
 
-        steps:
-            - uses: actions/checkout@v5
-            - name: Use Node.js 24.x
-              uses: actions/setup-node@v4
-              with:
-                  node-version: 24.x
+        # steps:
+            # - uses: actions/checkout@v5
+            # - name: Use Node.js 24.x
+              # uses: actions/setup-node@v4
+              # with:
+                  # node-version: 24.x
 
-            - name: Install Dependencies
-              run: npm install
+            # - name: Install Dependencies
+              # run: npm install
 
-            - name: Run local tests
-              run: npm test
-    #      - name: Run unit tests
-    #        run: npm run test:unit
-    #      - name: Run integration tests # (linux/osx)
-    #        if: startsWith(runner.OS, 'windows') == false
-    #        run: DEBUG=testing:* npm run test:integration
-    #      - name: Run integration tests # (windows)
-    #        if: startsWith(runner.OS, 'windows')
-    #        run: set DEBUG=testing:* & npm run test:integration
+            # - name: Run local tests
+              # run: npm test
+    # #      - name: Run unit tests
+    # #        run: npm run test:unit
+    # #      - name: Run integration tests # (linux/osx)
+    # #        if: startsWith(runner.OS, 'windows') == false
+    # #        run: DEBUG=testing:* npm run test:integration
+    # #      - name: Run integration tests # (windows)
+    # #        if: startsWith(runner.OS, 'windows')
+    # #        run: set DEBUG=testing:* & npm run test:integration
 
     # Deploys the final package to NPM
     deploy:
