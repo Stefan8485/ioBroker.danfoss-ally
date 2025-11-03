@@ -1,6 +1,6 @@
 {
   "name": "iobroker.danfoss-ally",
-  "version": "0.2.11-rc.9",
+  "version": "0.2.11-rc.10",
   "description": "ioBroker adapter for Danfoss Ally™ Cloud API (OAuth2)",
   "author": "Stefan Koch <stefan8485@me.com>",
   "license": "MIT",
