@@ -89,8 +89,10 @@ jobs:
       - name: Check effective registry
         run: npm config get registry
 
-      - name: Publish to npm (OIDC Trusted Publishing)
-        run: npm publish --access public --tag ${{ steps.tag.outputs.tag }}
+    - name: Publish to npm (Classic Token)
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npm publish --access public --tag ${{ steps.tag.outputs.tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
