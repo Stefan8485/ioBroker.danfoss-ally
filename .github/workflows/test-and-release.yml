@@ -82,7 +82,7 @@ jobs:
           fi
                    
         - name: Verify npm pack (dry run)
-          run:  npm pack --dry-run
+          run: npm pack --dry-run
 
       - name: Publish to npm (OIDC Trusted Publishing)
         env:
