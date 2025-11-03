@@ -67,6 +67,9 @@ jobs:
       - name: Install deps
         run: npm ci
 
+      - name: Verify npm login
+        run: npm whoami
+          
       # ermittelt, ob RC/Pre-Release (enthält '-') -> dann --tag next
       - name: Compute npm tag
         id: tag
@@ -74,13 +77,12 @@ jobs:
         run: |
           VER="${GITHUB_REF##*/v}"   # z.B. v0.2.11-rc.9 -> 0.2.11-rc.9
           if [[ "$VER" == *"-"* ]]; then
-            echo "NPMTAG=--tag next" >> "$GITHUB_OUTPUT"
+            echo "tag=next" >> "$GITHUB_OUTPUT"
           else
             echo "NPMTAG=" >> "$GITHUB_OUTPUT"
           fi
 
-        - name: Verify npm login
-          run: npm whoami
+ 
                     
         - name: Verify npm pack (dry run)
           run:  npm pack --dry-run
@@ -88,7 +90,7 @@ jobs:
       - name: Publish to npm (OIDC Trusted Publishing)
         env:
           NPM_CONFIG_PROVENANCE: true
-        run: npm publish --access public --provenance ${{ steps.tag.outputs.NPMTAG }}
+        run: npm publish --access public --provenance --tag ${{ steps.tag.outputs.tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
