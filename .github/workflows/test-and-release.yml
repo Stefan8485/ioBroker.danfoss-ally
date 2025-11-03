@@ -69,9 +69,9 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      - name: Verify npm login
-        run: npm whoami
-
+      - name: Show npm registry
+        run: npm config get registry
+  
       - name: Compute npm tag
         id: tag
         shell: bash
@@ -85,6 +85,9 @@ jobs:
 
       - name: Verify npm pack (dry run)
         run: npm pack --dry-run
+            
+      - name: Check effective registry
+        run: npm config get registry
 
       - name: Publish to npm (OIDC Trusted Publishing)
         env:
