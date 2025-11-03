@@ -68,9 +68,6 @@ jobs:
 
       - name: Install deps
         run: npm ci
-
-      - name: Show npm registry
-        run: npm config get registry
   
       - name: Compute npm tag
         id: tag
@@ -89,10 +86,10 @@ jobs:
       - name: Check effective registry
         run: npm config get registry
 
-      - name: Publish to npm (Classic Token)
+      - name: Publish to npm (OIDC Trusted Publishing)
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --tag ${{ steps.tag.outputs.tag }}
+          NPM_CONFIG_PROVENANCE: true
+        run: npm publish --access public --provenance --tag ${{ steps.tag.outputs.tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
