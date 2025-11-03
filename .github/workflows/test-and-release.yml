@@ -90,9 +90,7 @@ jobs:
         run: npm config get registry
 
       - name: Publish to npm (OIDC Trusted Publishing)
-        env:
-          NPM_CONFIG_PROVENANCE: true
-        run: npm publish --access public --provenance --tag ${{ steps.tag.outputs.tag }}
+        run: npm publish --access public --tag ${{ steps.tag.outputs.tag }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
