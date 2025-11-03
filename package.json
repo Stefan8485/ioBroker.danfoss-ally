@@ -53,6 +53,7 @@
   },
   "publishConfig": {
     "access": "public",
-    "provenance": true
+    "provenance": true,
+	"tag": "next"
   }
 }
