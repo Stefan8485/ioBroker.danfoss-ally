@@ -69,21 +69,18 @@ jobs:
 
       - name: Verify npm login
         run: npm whoami
-          
-      # ermittelt, ob RC/Pre-Release (enthält '-') -> dann --tag next
+
       - name: Compute npm tag
         id: tag
         shell: bash
         run: |
-          VER="${GITHUB_REF##*/v}"   # z.B. v0.2.11-rc.9 -> 0.2.11-rc.9
+          VER="${GITHUB_REF##*/v}" 
           if [[ "$VER" == *"-"* ]]; then
             echo "tag=next" >> "$GITHUB_OUTPUT"
           else
             echo "NPMTAG=" >> "$GITHUB_OUTPUT"
           fi
-
- 
-                    
+                   
         - name: Verify npm pack (dry run)
           run:  npm pack --dry-run
 
