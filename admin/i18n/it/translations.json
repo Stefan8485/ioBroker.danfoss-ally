@@ -1,9 +1,9 @@
 {
+  "API Base URL": "URL di base dell'API",
+  "API Key (Client ID)": "Chiave API (ID cliente)",
+  "API Secret (Client Secret)": "Segreto API (segreto client)",
   "Danfoss Ally Cloud": "Danfoss Ally Cloud",
-  "API Key (Client ID)": "API Key (Client ID)",
-  "API Secret (Client Secret)": "API Secret (Client Secret)",
-  "Token URL (OAuth2)": "Token URL (OAuth2)",
-  "API Base URL": "API Base URL",
-  "Scope (optional)": "Scope (optional)",
-  "Polling Interval (s)": "Polling Interval (s)"
+  "Polling Interval (s)": "Intervallo di polling (s)",
+  "Scope (optional)": "Ambito (facoltativo)",
+  "Token URL (OAuth2)": "URL del token (OAuth2)"
 }

@@ -1,9 +1,9 @@
 {
-  "Danfoss Ally Cloud": "Danfoss Ally Cloud",
-  "API Key (Client ID)": "API Key (Client ID)",
-  "API Secret (Client Secret)": "API Secret (Client Secret)",
-  "Token URL (OAuth2)": "Token URL (OAuth2)",
-  "API Base URL": "API Base URL",
-  "Scope (optional)": "Scope (optional)",
-  "Polling Interval (s)": "Polling Interval (s)"
+  "API Base URL": "Базовый URL-адрес API",
+  "API Key (Client ID)": "Ключ API (идентификатор клиента)",
+  "API Secret (Client Secret)": "Секрет API (секрет клиента)",
+  "Danfoss Ally Cloud": "Данфосс Элли Облако",
+  "Polling Interval (s)": "Интервал опроса (с)",
+  "Scope (optional)": "Область действия (необязательно)",
+  "Token URL (OAuth2)": "URL-адрес токена (OAuth2)"
 }

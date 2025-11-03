@@ -1,9 +1,9 @@
 {
   "name": "iobroker.danfoss-ally",
-  "version": "0.2.10",
+  "version": "0.2.11",
   "description": "ioBroker adapter for Danfoss Ally™ Cloud API (OAuth2)",
   "author": "Stefan Koch <stefan8485@me.com>",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "main": "main.js",
   "repository": {
     "type": "git",
@@ -14,34 +14,46 @@
     "Danfoss",
     "Ally",
     "Heating",
-	"Thermostat",
+    "Thermostat",
     "Humidity",
     "SmartHome",
     "Cloud"
   ],
   "files": [
-  "main.js",
-  "lib/",
-  "admin/",
-  "io-package.json",
-  "package.json",
-  "README.md"
+    "main.js",
+    "lib/",
+    "admin/",
+    "io-package.json",
+    "package.json",
+    "README.md"
   ],
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
     "axios": "^1.7.2"
   },
-"devDependencies": {
-  "@iobroker/adapter-dev": "^1.5.0",
-  "@iobroker/testing": "^5.1.1",
-  "eslint": "^8.57.0"
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@iobroker/adapter-dev": "^1.5.0",
+    "@iobroker/eslint-config": "^2.2.0",
+    "@iobroker/testing": "^5.1.1",
+    "@typescript-eslint/eslint-plugin": "^8.46.2",
+    "@typescript-eslint/parser": "^8.46.2",
+    "eslint": "^9.39.0",
+    "jsonlint": "^1.6.3",
+    "typescript": "^5.9.3"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=20 <23"
   },
   "scripts": {
     "lint": "eslint .",
-    "test": "mocha",
-	"release": "npm version patch && git push --follow-tags"
+    "test": "node -e \"console.log('no tests yet')\"",
+    "release": "npm version patch && git push --follow-tags",
+    "translate": "translate-adapter"
+  },
+  "publishConfig": {
+	"access": "public",
+	"registry": "https://registry.npmjs.org/",
+	"tag": "next"
   }
 }
