@@ -10,77 +10,77 @@ const TEMP_EPS = 0.05; // °C-Toleranz zum Abgleich mit Cloud
 
 // Typ-/Einheits-Hints halten die Objekte stabil (kein Typflip bei wechselnden API-Rückgaben)
 const TYPE_HINTS = new Map([
-    // Zahlen (°C)
-    ['temp_current', 'number'],
-    ['temp_set', 'number'],
-    ['upper_temp', 'number'],
-    ['lower_temp', 'number'],
-    ['at_home_setting', 'number'],
-    ['leaving_home_setting', 'number'],
-    ['pause_setting', 'number'],
-    ['holiday_setting', 'number'],
-    ['manual_mode_fast', 'number'],
+            // Zahlen (°C)
+            ['temp_current', 'number'],
+            ['temp_set', 'number'],
+            ['upper_temp', 'number'],
+            ['lower_temp', 'number'],
+            ['at_home_setting', 'number'],
+            ['leaving_home_setting', 'number'],
+            ['pause_setting', 'number'],
+            ['holiday_setting', 'number'],
+            ['manual_mode_fast', 'number'],
 
-    // Zahlen (%)
-    ['humidity_value', 'number'],
-    ['battery_percentage', 'number'],
+            // Zahlen (%)
+            ['humidity_value', 'number'],
+            ['battery_percentage', 'number'],
 
-    // Bool
-    ['child_lock', 'boolean'],
+            // Bool
+            ['child_lock', 'boolean'],
 
-    // Strings (Enums/Text)
-    ['mode', 'string'],
-    ['SetpointChangeSource', 'string'],
-    ['work_state', 'string'],
-    ['output_status', 'string'],
-    ['fault', 'string'],
-]);
+            // Strings (Enums/Text)
+            ['mode', 'string'],
+            ['SetpointChangeSource', 'string'],
+            ['work_state', 'string'],
+            ['output_status', 'string'],
+            ['fault', 'string'],
+        ]);
 
 const UNIT_HINTS = new Map([
-    ['temp_current', '°C'],
-    ['temp_set', '°C'],
-    ['upper_temp', '°C'],
-    ['lower_temp', '°C'],
-    ['at_home_setting', '°C'],
-    ['leaving_home_setting', '°C'],
-    ['pause_setting', '°C'],
-    ['holiday_setting', '°C'],
-    ['humidity_value', '%'],
-    ['battery_percentage', '%'],
-    ['manual_mode_fast', '°C'],
-]);
+            ['temp_current', '°C'],
+            ['temp_set', '°C'],
+            ['upper_temp', '°C'],
+            ['lower_temp', '°C'],
+            ['at_home_setting', '°C'],
+            ['leaving_home_setting', '°C'],
+            ['pause_setting', '°C'],
+            ['holiday_setting', '°C'],
+            ['humidity_value', '%'],
+            ['battery_percentage', '%'],
+            ['manual_mode_fast', '°C'],
+        ]);
 
 // Beschreibbare States
 const WRITEABLE_CODES = new Set([
-    'temp_set', // manuelle Solltemperatur
-    'manual_mode_fast', // UI-write erlaubt, wird auf temp_set gemappt
-    'at_home_setting',
-    'leaving_home_setting',
-    'pause_setting',
-    'holiday_setting',
-    'mode',
-    'child_lock',
-    'SetpointChangeSource',
-]);
+            'temp_set', // manuelle Solltemperatur
+            'manual_mode_fast', // UI-write erlaubt, wird auf temp_set gemappt
+            'at_home_setting',
+            'leaving_home_setting',
+            'pause_setting',
+            'holiday_setting',
+            'mode',
+            'child_lock',
+            'SetpointChangeSource',
+        ]);
 
 /** ------- Alias-/Normalisierung ------- */
 const CODE_ALIASES = new Map([
-    ['pause_settings', 'pause_setting'],
-    ['pause', 'pause_setting'], // falls jemand nur "pause" schreibt
-    ['setpoint_change_source', 'SetpointChangeSource'],
-    ['setpointchangesource', 'SetpointChangeSource'],
-    ['setpoint_change', 'SetpointChangeSource'],
-]);
+            ['pause_settings', 'pause_setting'],
+            ['pause', 'pause_setting'], // falls jemand nur "pause" schreibt
+            ['setpoint_change_source', 'SetpointChangeSource'],
+            ['setpointchangesource', 'SetpointChangeSource'],
+            ['setpoint_change', 'SetpointChangeSource'],
+        ]);
 
 const MODE_ALIASES = new Map([
-    ['holiday_sat', 'holiday'], // Spezialfall → „holiday“
-    ['manual', 'manual'],
-    ['leaving_home', 'leaving_home'],
-    ['pause', 'pause'],
-    ['at_home', 'at_home'],
-    ['holiday', 'holiday'],
-    ['auto', 'auto'],
-]);
+            ['holiday_sat', 'holiday'], // Spezialfall → „holiday“
+            ['manual', 'manual'],
+            ['leaving_home', 'leaving_home'],
+            ['pause', 'pause'],
+            ['at_home', 'at_home'],
+            ['holiday', 'holiday'],
+            ['auto', 'auto'],
+        ]);
 
 function normalizeCode(codeRaw) {
     const c = String(codeRaw || '').trim();
@@ -160,6 +160,7 @@ class DanfossAlly extends utils.Adapter {
         this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
         this.on('unload', this.onUnload.bind(this));
+        this.timeoutHandles = new Map();
 
         // Write-Coordination
         this._pending = new Map(); // key: `${deviceId}.${code}` -> { val, until }
@@ -183,16 +184,14 @@ class DanfossAlly extends utils.Adapter {
             return;
         }
 
-        this.api = new DanfossAPI(
-            {
-                apiKey,
-                apiSecret,
-                tokenUrl,
-                apiBaseUrl,
-                scope,
-            },
-            this.log,
-        );
+        this.api = new DanfossAPI({
+            apiKey,
+            apiSecret,
+            tokenUrl,
+            apiBaseUrl,
+            scope,
+        },
+                this.log, );
 
         try {
             await this.api.ensureToken();
@@ -248,8 +247,8 @@ class DanfossAlly extends utils.Adapter {
     async updateDevices() {
         const pollStartedAt = Date.now();
         let changed = 0,
-            skipped = 0,
-            held = 0;
+        skipped = 0,
+        held = 0;
 
         try {
             // Anti-Race: direkt nach einem lokalen Write kurz nicht pollen
@@ -372,7 +371,7 @@ class DanfossAlly extends utils.Adapter {
                     if (pending && pollStartedAt < pending.until) {
                         const same =
                             (typeof value === 'number' && Math.abs(value - Number(pending.val)) <= TEMP_EPS) ||
-                            value === pending.val;
+                        value === pending.val;
 
                         if (same) {
                             // Cloud hat den lokalen Wert erreicht -> Hold auflösen
@@ -382,8 +381,7 @@ class DanfossAlly extends utils.Adapter {
                             // Lokalen Wert weiterhin schützen
                             held++;
                             this.log.debug(
-                                `HOLD ${key}: keep local=${dval(pending.val)} vs cloud=${dval(value)} (until ${new Date(pending.until).toISOString()})`,
-                            );
+`HOLD ${key}: keep local=${dval(pending.val)} vs cloud=${dval(value)} (until ${new Date(pending.until).toISOString()})`, );
                             continue; // cloud nicht anwenden
                         }
                     }
@@ -395,8 +393,7 @@ class DanfossAlly extends utils.Adapter {
                         const same = cur && cur.val !== undefined && isSameVal(code, cur.val, value);
                         if (!same) {
                             this.log.debug(
-                                `SUPPRESS ${key}: skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (pollStartedAt - lastWriteTs)}ms (recent local write)`,
-                            );
+`SUPPRESS ${key}: skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (pollStartedAt - lastWriteTs)}ms (recent local write)`, );
                             continue;
                         }
                     }
@@ -451,12 +448,12 @@ class DanfossAlly extends utils.Adapter {
         try {
             const raw = await this.api.getDeviceStatus(deviceId);
             const statusArray = Array.isArray(raw?.result)
-                ? raw.result
-                : Array.isArray(raw?.status)
-                  ? raw.status
-                  : Array.isArray(raw)
-                    ? raw
-                    : [];
+                 ? raw.result
+                 : Array.isArray(raw?.status)
+                 ? raw.status
+                 : Array.isArray(raw)
+                 ? raw
+                 : [];
 
             const devPath = `${deviceId}`;
             for (const entry of statusArray) {
@@ -498,7 +495,7 @@ class DanfossAlly extends utils.Adapter {
                 if (pending && Date.now() < pending.until) {
                     const same =
                         (typeof value === 'number' && Math.abs(value - Number(pending.val)) <= TEMP_EPS) ||
-                        value === pending.val;
+                    value === pending.val;
                     if (same) {
                         this.log.debug(`MATCH ${key}: cloud≈local → drop hold`);
                         this._pending.delete(key);
@@ -515,8 +512,7 @@ class DanfossAlly extends utils.Adapter {
                     const same = cur && cur.val !== undefined && isSameVal(code, cur.val, value);
                     if (!same) {
                         this.log.debug(
-                            `SUPPRESS ${key} (soft): skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (Date.now() - lastWriteTs)}ms`,
-                        );
+`SUPPRESS ${key} (soft): skip cloud=${dval(value)} for ${LAG_SUPPRESS_MS - (Date.now() - lastWriteTs)}ms`, );
                         continue;
                     }
                 }
@@ -536,9 +532,18 @@ class DanfossAlly extends utils.Adapter {
     }
 
     _softRefreshSoon(deviceId, code) {
-        // Nach Write: nur den betroffenen Code + temp_current schnell nachziehen
         const codes = new Set([code, 'temp_current']);
-        setTimeout(() => this._softRefreshOne(deviceId, codes), 1500);
+
+        if (this.timeoutHandles.has(deviceId)) {
+            clearTimeout(this.timeoutHandles.get(deviceId));
+        }
+
+        const handle = setTimeout(() => {
+            this._softRefreshOne(deviceId, codes);
+            this.timeoutHandles.delete(deviceId);
+        }, 1500);
+
+        this.timeoutHandles.set(deviceId, handle);
     }
 
     /**
@@ -553,8 +558,7 @@ class DanfossAlly extends utils.Adapter {
         this.log.debug(`SEND ${deviceId}: ${code}=${dval(value)}`);
         try {
             await this.api.sendCommand(deviceId, {
-                commands: [
-                    {
+                commands: [{
                         code,
                         value,
                     },
@@ -573,8 +577,7 @@ class DanfossAlly extends utils.Adapter {
                 try {
                     await this.api.ensureToken();
                     await this.api.sendCommand(deviceId, {
-                        commands: [
-                            {
+                        commands: [{
                                 code,
                                 value,
                             },
@@ -654,10 +657,9 @@ class DanfossAlly extends utils.Adapter {
 
                 const v10 = Math.round(target * 10);
                 this.log.debug(
-                    `PREP ${deviceId}: input=${dval(v)}${before !== target ? ` clamped→${dval(target)}` : ''} send×10=${v10}` +
-                        `${lower && typeof lower.val === 'number' ? ` (lower=${dval(lower.val)})` : ''}` +
-                        `${upper && typeof upper.val === 'number' ? ` (upper=${dval(upper.val)})` : ''}`,
-                );
+                    `PREP ${deviceId}: input=${dval(v)}${before !== target ? ` clamped→${dval(target)}` : ''} send×10=${v10}` + 
+                    `${lower && typeof lower.val === 'number' ? ` (lower=${dval(lower.val)})` : ''}` + 
+`${upper && typeof upper.val === 'number' ? ` (upper=${dval(upper.val)})` : ''}`, );
                 return v10;
             };
 
@@ -790,13 +792,13 @@ class DanfossAlly extends utils.Adapter {
 
     mapRole(code) {
         const writeableTemp = new Set([
-            'temp_set',
-            'manual_mode_fast',
-            'at_home_setting',
-            'leaving_home_setting',
-            'pause_setting',
-            'holiday_setting',
-        ]);
+                    'temp_set',
+                    'manual_mode_fast',
+                    'at_home_setting',
+                    'leaving_home_setting',
+                    'pause_setting',
+                    'holiday_setting',
+                ]);
 
         const roTemp = new Set(['temp_current', 'lower_temp', 'upper_temp']);
 
@@ -847,13 +849,25 @@ class DanfossAlly extends utils.Adapter {
         try {
             if (this.pollInterval) {
                 clearInterval(this.pollInterval);
+                this.log.debug('Polling interval cleared.');
             }
-            this.log.info('Adapter stopped');
+
+            if (this.timeoutHandles && this.timeoutHandles.size > 0) {
+                for (const handle of this.timeoutHandles.values()) {
+                    clearTimeout(handle);
+                }
+                this.timeoutHandles.clear();
+                this.log.debug('All pending soft-refresh timers cleared.');
+            }
+
+            this.log.info('Adapter stopped cleanly.');
             callback();
         } catch (err) {
-            this.log.error(`onStateChange error: ${err.message}`);
+            this.log.error(`onUnload error: ${err.message}`);
+            callback();
         }
     }
+
 }
 
 if (require.main !== module) {

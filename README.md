@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.11-blue)  [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)   
+# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.12-blue)  [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)   
 
 [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=flat&data=d&color=blue)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
@@ -243,12 +243,15 @@ All send, retry, and confirm logs appear at debug level.
 
 ## Changelog
 
-### v0.2.11
+### 0.2.12
+- compliance ans iobroker fixes
+
+### 0.2.11
 - Full write support for all cloud-controllable values
 - Improved token retry handling
 - Enhanced synchronization and logging
 
-### v0.2.10
+### 0.2.10
 - Translation and compliance fixes  
 - Improved admin schema, license info, encryption handling
 
