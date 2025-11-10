@@ -37,7 +37,7 @@
     "@iobroker/eslint-config": "^2.2.0",
     "@iobroker/testing": "^5.2.2",
     "@typescript-eslint/eslint-plugin": "^8.46.3",
-    "@typescript-eslint/parser": "^8.46.3",
+    "@typescript-eslint/parser": "^8.46.4",
     "eslint": "^9.39.1",
     "jsonlint": "^1.6.3",
     "typescript": "^5.9.3"
