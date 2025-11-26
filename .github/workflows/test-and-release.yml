@@ -31,7 +31,7 @@ jobs:
         run: npm ci
 
       - name: Run ioBroker test: check
-        uses: ioBroker/testing-action-check@v1
+        uses: iobroker/testing-action-check@v1
 
       - name: Run ESLint
         run: npm run lint
@@ -62,7 +62,7 @@ jobs:
 
       # Full ioBroker test suite
       - name: Run ioBroker adapter tests
-        uses: ioBroker/testing-action-adapter@v1
+        uses: iobroker/testing-action-adapter@v1
 
   # ---------------------------------------------------
   # DEPLOY – TRUSTED PUBLISHING
