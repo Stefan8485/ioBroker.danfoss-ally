@@ -30,11 +30,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # ioBroker testing: package.json validity
-      - name: Run iobroker test: check
+      - name: Run ioBroker test: check
         uses: ioBroker/testing-action-check@v1
 
-      # Linting (Reviewer-Pflicht)
       - name: Run ESLint
         run: npm run lint
 
