@@ -2,104 +2,68 @@ name: Test and Release
 
 on:
   push:
-    branches: ['*']
+    branches:
+      - "*"
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-**'
+      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+-**"
   pull_request: {}
-
-permissions:
-  contents: read
-  id-token: write
 
 jobs:
   # ---------------------------------------------------
-  # LINTING + BASE CHECK
+  # 1) QUICK CHECK + LINT (ioBroker Standard)
   # ---------------------------------------------------
   check-and-lint:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v4
+      - uses: ioBroker/testing-action-check@v1
         with:
-          node-version: 22.x
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run ioBroker test: check
-        uses: iobroker/testing-action-check@v1
-
-      - name: Run ESLint
-        run: npm run lint
+          node-version: "22.x"
+          lint: true
 
   # ---------------------------------------------------
-  # FULL TEST MATRIX (NODE 20/22/24 + LINUX/WIN/MAC)
+  # 2) FULL TEST MATRIX (Node 20/22/24 + Linux/Win/Mac)
   # ---------------------------------------------------
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     needs: check-and-lint
+
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        node-version: [20.x, 22.x, 24.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
-        node: [20.x, 22.x, 24.x]
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ matrix.node }}
-        uses: actions/setup-node@v4
+      - uses: ioBroker/testing-action-adapter@v1
         with:
-          node-version: ${{ matrix.node }}
-
-      - name: Install dependencies
-        run: npm ci
-
-      # Full ioBroker test suite
-      - name: Run ioBroker adapter tests
-        uses: iobroker/testing-action-adapter@v1
+          node-version: ${{ matrix['node-version'] }}
+          os: ${{ matrix.os }}
 
   # ---------------------------------------------------
-  # DEPLOY – TRUSTED PUBLISHING
+  # 3) DEPLOY — NPM Trusted Publishing + GitHub Release
   # ---------------------------------------------------
   deploy:
-    needs: adapter-tests
+    needs: [check-and-lint, adapter-tests]
+
+    # Trusted Publishing + Release creation needs these permissions
+    permissions:
+      contents: write
+      id-token: write
+
+    # Only release on tag push
     if: |
       contains(github.event.head_commit.message, '[skip ci]') == false &&
       github.event_name == 'push' &&
-      startsWith(github.ref, 'refs/tags/')
+      startsWith(github.ref, 'refs/tags/v')
+
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Use Node.js 22.x
-        uses: actions/setup-node@v4
+      - uses: ioBroker/testing-action-deploy@v1
         with:
-          node-version: 22.x
-          registry-url: "https://registry.npmjs.org/"
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify npm pack
-        run: npm pack --dry-run
-
-      - name: Publish via Trusted Publishing
-        env:
-          NPM_CONFIG_PROVENANCE: true
-        run: npm publish --access public --provenance
-
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          generate_release_notes: true
+          node-version: "22.x"
+          github-token: ${{ secrets.GITHUB_TOKEN }}
