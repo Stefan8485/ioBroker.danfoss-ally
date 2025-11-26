@@ -2,11 +2,11 @@ name: i18n Auto-Translate
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
     paths:
-      - 'admin/**'
-      - 'io-package.json'
-      - 'package.json'
+      - "admin/**"
+      - "io-package.json"
+      - "package.json"
   workflow_dispatch:
 
 jobs:
@@ -22,8 +22,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
 
       - name: Install deps
         run: npm ci
