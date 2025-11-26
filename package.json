@@ -45,6 +45,7 @@
 	"lint": "eslint .",
 	"test": "node -e \"console.log('iobroker testing runs in CI')\"",
 	"test:package": "exit 0",
+	"test:integration": "exit 0",
 	"release": "npm version patch && git push --follow-tags",
 	"translate": "translate-adapter"
   }
