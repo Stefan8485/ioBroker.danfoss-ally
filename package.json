@@ -25,7 +25,8 @@
     "admin/",
     "io-package.json",
     "package.json",
-    "README.md"
+    "README.md",
+    "eslint.config.mjs"
   ],
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
@@ -34,7 +35,7 @@
   "devDependencies": {
     "@iobroker/eslint-config": "^2.2.0",
     "@iobroker/testing": "^5.1.1",
-    "eslint": "^8.57.0",
+    "eslint": "^9.39.0",
     "jsonlint": "^1.6.3"
   },
   "engines": {
