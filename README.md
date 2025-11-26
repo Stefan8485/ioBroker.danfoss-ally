@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.11-blue)  [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)   
+# ioBroker.danfoss-ally  ![version](https://img.shields.io/badge/version-0.2.12-blue)  [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)   
 
 [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=flat&data=d&color=blue)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
@@ -242,6 +242,13 @@ All send, retry, and confirm logs appear at debug level.
 ---
 
 ## Changelog
+
+### 0.2.12
+- Migrated CI to full ioBroker standard
+- Full rewrite of state roles (value.*, level.*, state) for compatibility
+- Correct creation of device and status channels according to ioBroker standards
+- Replaced all timers with adapter.setTimeout / adapter.setInterval
+- Stabilized soft refresh process and ensured channel creation
 
 ### 0.2.11
 - Full write support for all cloud-controllable values

@@ -4,7 +4,7 @@ on:
   push:
     branches: ['*']
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'      
+      - 'v[0-9]+.[0-9]+.[0-9]+'
       - 'v[0-9]+.[0-9]+.[0-9]+-**'
   pull_request: {}
 
@@ -13,42 +13,64 @@ permissions:
   id-token: write
 
 jobs:
-  # schnelle Checks
+  # ---------------------------------------------------
+  # LINTING + BASE CHECK
+  # ---------------------------------------------------
   check-and-lint:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Use Node.js 22.x
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-      - name: Install deps
+
+      - name: Install dependencies
         run: npm ci
 
-  # Adapter-Tests Ubuntu & Windows (Node 22)
+      # ioBroker testing: package.json validity
+      - name: Run iobroker test: check
+        uses: ioBroker/testing-action-check@v1
+
+      # Linting (Reviewer-Pflicht)
+      - name: Run ESLint
+        run: npm run lint
+
+  # ---------------------------------------------------
+  # FULL TEST MATRIX (NODE 20/22/24 + LINUX/WIN/MAC)
+  # ---------------------------------------------------
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
-    needs: [check-and-lint]
+    needs: check-and-lint
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node: [20.x, 22.x, 24.x]
+
     steps:
       - uses: actions/checkout@v4
-      - name: Use Node.js 22.x
+
+      - name: Use Node.js ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
-          node-version: 22.x
-      - name: Install deps
-        run: npm ci
-      - name: Run tests
-        run: npm test
+          node-version: ${{ matrix.node }}
 
-  # Release auf npm (Trusted Publishing + provenance)
+      - name: Install dependencies
+        run: npm ci
+
+      # Full ioBroker test suite
+      - name: Run ioBroker adapter tests
+        uses: ioBroker/testing-action-adapter@v1
+
+  # ---------------------------------------------------
+  # DEPLOY – TRUSTED PUBLISHING
+  # ---------------------------------------------------
   deploy:
-    needs: [adapter-tests]
+    needs: adapter-tests
     if: |
       contains(github.event.head_commit.message, '[skip ci]') == false &&
       github.event_name == 'push' &&
@@ -57,6 +79,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+
     steps:
       - uses: actions/checkout@v4
 
@@ -64,32 +87,18 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22.x
-          registry-url: 'https://registry.npmjs.org/'
+          registry-url: "https://registry.npmjs.org/"
 
-      - name: Install deps
+      - name: Install dependencies
         run: npm ci
-  
-      - name: Compute npm tag
-        id: tag
-        shell: bash
-        run: |
-          VER="${GITHUB_REF##*/v}"
-          if [[ "$VER" == *"-"* ]]; then
-            echo "tag=next" >> "$GITHUB_OUTPUT"
-          else
-            echo "tag=latest" >> "$GITHUB_OUTPUT"
-          fi
 
-      - name: Verify npm pack (dry run)
+      - name: Verify npm pack
         run: npm pack --dry-run
-            
-      - name: Check effective registry
-        run: npm config get registry
 
-      - name: Publish to npm (OIDC Trusted Publishing)
+      - name: Publish via Trusted Publishing
         env:
           NPM_CONFIG_PROVENANCE: true
-        run: npm publish --access public --provenance --tag ${{ steps.tag.outputs.tag }}
+        run: npm publish --access public --provenance
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2

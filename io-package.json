@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.11",
+    "version": "0.2.12",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,10 +29,22 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+	 "0.2.12": {
+		  "en": "Migrated CI to ioBroker standard; reworked state roles; corrected device/status channel structure; replaced timers with adapter.setTimeout/adapter.setInterval; stabilized soft refresh.",
+		  "de": "CI auf ioBroker-Standard umgestellt; Rollen überarbeitet; Geräte- und Statuskanäle korrigiert; Timer auf adapter.setTimeout/adapter.setInterval umgestellt; Soft-Refresh stabilisiert.",
+		  "ru": "CI перенесено на стандарт ioBroker; переработаны роли; исправлена структура каналов; заменены таймеры; стабилизирован soft refresh.",
+		  "pt": "CI migrado para o padrão ioBroker; funções revistas; estrutura de canais corrigida; temporizadores substituídos; soft refresh estabilizado.",
+		  "nl": "CI gemigreerd naar ioBroker-standaard; rollen herzien; kanaalstructuur gecorrigeerd; timers vervangen; soft refresh gestabiliseerd.",
+		  "fr": "CI migré au standard ioBroker; rôles révisés; structure des canaux corrigée; minuteries remplacées; soft refresh stabilisé.",
+		  "it": "CI migrata allo standard ioBroker; ruoli rivisti; struttura dei canali corretta; timer sostituiti; soft refresh stabilizzato.",
+		  "es": "CI migrado al estándar ioBroker; roles revisados; estructura de canales corregida; temporizadores reemplazados; soft refresh estabilizado.",
+		  "pl": "CI przeniesione do standardu ioBroker; poprawione role; poprawiona struktura kanałów; zastąpiono timery; ustabilizowano soft refresh.",
+		  "zh-cn": "CI 迁移到 ioBroker 标准；重新调整角色；修复通道结构；替换定时器；稳定软刷新。"
+		},
       "0.2.11": {
         "en": "Added full write support for Danfoss Ally",
         "de": "Vollständige Schreibunterstützung für Danfoss Ally hinzugefügt",
-        "ru": "Добавлена ​​полная поддержка записи для Danfoss Ally.",
+        "ru": "Добавлена полная поддержка записи для Danfoss Ally.",
         "pt": "Adicionado suporte completo de gravação para Danfoss Ally",
         "nl": "Volledige schrijfondersteuning toegevoegd voor Danfoss Ally",
         "fr": "Ajout d'une prise en charge complète en écriture pour Danfoss Ally",

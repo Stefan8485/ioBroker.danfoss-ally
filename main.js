@@ -211,7 +211,7 @@ class DanfossAlly extends utils.Adapter {
             }
 
             this.pollInterval = this.setInterval(() => this.updateDevices(), intervalSec * 1000);
-            this.log.info(`Polling interval set to ${intervalSec}s`);
+            this.log.debug(`Polling interval set to ${intervalSec}s`);
 
             // Auf Schreib-States hören (inkl. Aliasse)
             [
@@ -278,6 +278,13 @@ class DanfossAlly extends utils.Adapter {
                     },
                     native: dev.raw || {},
                 });
+				
+				// Channel "status" unter dem Gerät anlegen
+				await this.setObjectNotExistsAsync(`${devPath}.status`, {
+					type: "channel",
+					common: { name: "Status" },
+					native: {}
+				});
 
                 // Statusquelle (Array aus raw.status oder Key/Value aus dev.status)
                 let pairs = [];
@@ -325,7 +332,7 @@ class DanfossAlly extends utils.Adapter {
                         (typeof value === 'number' ? 'number' : typeof value === 'boolean' ? 'boolean' : 'string');
                     const unit = UNIT_HINTS.get(code) || this.mapUnit(code);
 
-                    const id = `${devPath}.${code}`;
+                    const id = `${devPath}.status.${code}`
                     const existing = await this.getObjectAsync(id);
                     if (!existing) {
                         await this.setObjectAsync(id, {
@@ -398,22 +405,19 @@ class DanfossAlly extends utils.Adapter {
                         }
                     }
 
-                    // Only-if-changed schreiben
-                    const cur = await this.getStateAsync(id);
-                    if (cur && cur.val !== undefined && isSameVal(code, cur.val, value)) {
-                        skipped++;
-                    } else {
-                        changed++;
-                        this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
-                        await this.setStateAsync(id, {
-                            val: value,
-                            ack: true,
-                        });
-                    }
+					const result = await this.setStateChangedAsync(id, value, true);
+					if (result) {
+						// result = true → Wert wurde geändert
+						changed++;
+						this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
+					} else {
+						// result = false → Wert war identisch, wurde NICHT geschrieben
+						skipped++;
+					}
                 }
             }
 
-            this.log.info(`Updated ${devices.length} devices. Changed=${changed}, Skipped=${skipped}, Held=${held}`);
+            this.log.debug(`Updated ${devices.length} devices. Changed=${changed}, Skipped=${skipped}, Held=${held}`);
         } catch (err) {
             this.log.error(`Error updating devices: ${err.message}`);
         }
@@ -456,6 +460,19 @@ class DanfossAlly extends utils.Adapter {
                  : [];
 
             const devPath = `${deviceId}`;
+			
+			await this.setObjectNotExistsAsync(devPath, {
+				type: "device",
+				common: { name: deviceId },
+				native: {}
+			});
+
+			await this.setObjectNotExistsAsync(`${devPath}.status`, {
+				type: "channel",
+				common: { name: "Status" },
+				native: {}
+			});
+
             for (const entry of statusArray) {
                 let code = normalizeCode(entry.code);
                 if (!code) {
@@ -487,7 +504,7 @@ class DanfossAlly extends utils.Adapter {
                 }
                 value = coerceTypeByHint(code, value);
 
-                const id = `${devPath}.${code}`;
+                const id = `${devPath}.status.${code}`
                 const key = `${deviceId}.${code}`;
 
                 // HOLD-Logik
@@ -531,20 +548,21 @@ class DanfossAlly extends utils.Adapter {
         }
     }
 
-    _softRefreshSoon(deviceId, code) {
-        const codes = new Set([code, 'temp_current']);
+	_softRefreshSoon(deviceId, code) {
+		const codes = new Set([code, 'temp_current']);
 
-        if (this.timeoutHandles.has(deviceId)) {
-            clearTimeout(this.timeoutHandles.get(deviceId));
-        }
+		if (this.timeoutHandles.has(deviceId)) {
+			this.clearTimeout(this.timeoutHandles.get(deviceId));
+		}
 
-        const handle = setTimeout(() => {
-            this._softRefreshOne(deviceId, codes);
-            this.timeoutHandles.delete(deviceId);
-        }, 1500);
+		const handle = this.setTimeout(() => {
+			this._softRefreshOne(deviceId, codes);
+			this.timeoutHandles.delete(deviceId);
+		}, 1500);
 
-        this.timeoutHandles.set(deviceId, handle);
-    }
+		this.timeoutHandles.set(deviceId, handle);
+	}
+
 
     /**
      * Hilfsfunktion: einen einzelnen Befehl senden (mit Debug + Retry)
@@ -791,42 +809,58 @@ class DanfossAlly extends utils.Adapter {
     }
 
     mapRole(code) {
-        const writeableTemp = new Set([
-                    'temp_set',
-                    'manual_mode_fast',
-                    'at_home_setting',
-                    'leaving_home_setting',
-                    'pause_setting',
-                    'holiday_setting',
-                ]);
 
-        const roTemp = new Set(['temp_current', 'lower_temp', 'upper_temp']);
+		// Schreibbare Temperatur-Werte (Soll)
+		const writeableTemp = new Set([
+			"temp_set",
+			"manual_mode_fast",
+			"at_home_setting",
+			"leaving_home_setting",
+			"pause_setting",
+			"holiday_setting",
+		]);
 
-        if (writeableTemp.has(code)) {
-            return 'level.temperature';
-        }
-        if (roTemp.has(code)) {
-            return 'value.temperature';
-        }
+		// Read-Only Temperatur-Werte (Ist/Limits)
+		const roTemp = new Set([
+			"temp_current",
+			"lower_temp",
+			"upper_temp",
+		]);
 
-        if (code === 'humidity_value') {
-            return 'value.humidity';
-        }
-        if (code === 'battery_percentage') {
-            return 'value.battery';
-        }
-        if (code === 'child_lock') {
-            return 'switch';
-        }
-        if (code === 'mode') {
-            return 'text';
-        }
-        if (code === 'work_state' || code === 'output_status' || code === 'fault') {
-            return 'text';
-        }
+		if (writeableTemp.has(code)) {
+			return "level.temperature";
+		}
+		if (roTemp.has(code)) {
+			return "value.temperature";
+		}
 
-        return 'state';
-    }
+		// Luftfeuchtigkeit
+		if (code === "humidity_value") {
+			return "value.humidity";
+		}
+
+		// Batterie
+		if (code === "battery_percentage") {
+			return "value.battery";
+		}
+
+		// Kindersicherung
+		if (code === "child_lock") {
+			return "switch.lock"; // boolean writeable
+		}
+
+		// Betriebsmodus / Strings → allgemeiner Status
+		if (code === "mode") {
+			return "state";
+		}
+		if (code === "work_state" || code === "output_status" || code === "fault") {
+			return "state";
+		}
+
+		// Fallback
+		return "state";
+	}
+
 
     mapUnit(code) {
         const units = {
@@ -845,28 +879,28 @@ class DanfossAlly extends utils.Adapter {
         return units[code] || '';
     }
 
-    onUnload(callback) {
-        try {
-            if (this.pollInterval) {
-                clearInterval(this.pollInterval);
-                this.log.debug('Polling interval cleared.');
-            }
+	onUnload(callback) {
+		try {
+			if (this.pollInterval) {
+				this.clearInterval(this.pollInterval);
+				this.log.debug('Polling interval cleared.');
+			}
 
-            if (this.timeoutHandles && this.timeoutHandles.size > 0) {
-                for (const handle of this.timeoutHandles.values()) {
-                    clearTimeout(handle);
-                }
-                this.timeoutHandles.clear();
-                this.log.debug('All pending soft-refresh timers cleared.');
-            }
+			if (this.timeoutHandles && this.timeoutHandles.size > 0) {
+				for (const handle of this.timeoutHandles.values()) {
+					this.clearTimeout(handle);
+				}
+				this.timeoutHandles.clear();
+				this.log.debug('All pending soft-refresh timers cleared.');
+			}
 
-            this.log.info('Adapter stopped cleanly.');
-            callback();
-        } catch (err) {
-            this.log.error(`onUnload error: ${err.message}`);
-            callback();
-        }
-    }
+			this.log.info('Adapter stopped cleanly.');
+			callback();
+		} catch (err) {
+			this.log.error(`onUnload error: ${err.message}`);
+			callback();
+		}
+	}
 
 }
 
