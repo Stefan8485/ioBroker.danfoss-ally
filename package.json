@@ -32,7 +32,7 @@
     "axios": "^1.13.2"
   },
   "devDependencies": {
-    "@iobroker/eslint-config": "^3.5.0",
+    "@iobroker/eslint-config": "^3.3.0",
     "@iobroker/testing": "^5.1.1",
     "eslint": "^9.39.0",
     "jsonlint": "^1.6.3",
