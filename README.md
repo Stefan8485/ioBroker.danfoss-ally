@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally ![version](https://img.shields.io/badge/version-0.2.12-blue) [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)
+# ioBroker.danfoss-ally ![version](https://img.shields.io/badge/version-0.2.13-blue) [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
 [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=flat&data=d&color=blue)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
@@ -243,6 +243,12 @@ All send, retry, and confirm logs appear at debug level.
 ---
 
 ## Changelog
+
+### 0.2.13
+- Updated CI & deploy workflow
+- Fixed npm publishing process
+- Improved code formatting (Prettier / ESLint)
+- No functional changes for end users
 
 ### 0.2.12
 - Migrated CI to full ioBroker standard

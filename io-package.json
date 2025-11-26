@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.12",
+    "version": "0.2.13",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,19 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+	   "0.2.13": {
+		"en": "Maintenance release: updated CI/deploy workflow, fixed npm publishing and improved formatting (Prettier/ESLint). No functional changes.",
+		"de": "Wartungsupdate: CI/Deploy-Workflow aktualisiert, npm-Veröffentlichung korrigiert und Formatierung verbessert (Prettier/ESLint). Keine Funktionsänderungen.",
+		"ru": "Технический релиз: обновлены CI/деплой, исправлена публикация npm и улучшено форматирование. Изменений функционала нет.",
+		"pt": "Lançamento de manutenção: CI/deploy atualizado, publicação no npm corrigida e formatação aprimorada. Sem mudanças funcionais.",
+		"nl": "Onderhoudsrelease: CI/deploy bijgewerkt, npm-publicatie verbeterd en formatting verbeterd. Geen functionele wijzigingen.",
+		"fr": "Version de maintenance : CI/deploy mis à jour, publication npm corrigée et formatage amélioré. Aucun changement fonctionnel.",
+		"it": "Release di manutenzione: aggiornato CI/deploy, corretta pubblicazione npm e migliorata la formattazione. Nessuna modifica funzionale.",
+		"es": "Lanzamiento de mantenimiento: CI/deploy actualizado, publicación npm corregida y formato mejorado. Sin cambios funcionales.",
+		"pl": "Wydanie konserwacyjne: zaktualizowano CI/deploy, poprawiono publikację npm i ulepszono formatowanie. Brak zmian funkcjonalnych.",
+		"uk": "Технічний реліз: оновлено CI/deploy, виправлено публікацію npm і покращено форматування. Жодних змін у функціональності.",
+		"zh-cn": "维护版本：更新 CI/部署流程、修复 npm 发布并改进格式。无功能更改。"
+		},
       "0.2.12": {
         "en": "Migrated CI to ioBroker standard; reworked state roles; corrected device/status channel structure; replaced timers with adapter.setTimeout/adapter.setInterval; stabilized soft refresh.",
         "de": "CI auf ioBroker-Standard umgestellt; Rollen überarbeitet; Geräte- und Statuskanäle korrigiert; Timer auf adapter.setTimeout/adapter.setInterval umgestellt; Soft-Refresh stabilisiert.",
