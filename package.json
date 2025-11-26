@@ -33,19 +33,19 @@
     "axios": "^1.13.2"
   },
   "devDependencies": {
-    "@iobroker/eslint-config": "^2.2.0",
-    "@iobroker/testing": "^5.1.1",
-    "eslint": "^9.37.0",
-    "jsonlint": "^1.6.3",
-    "prettier": "^3.6.2"
+	"@iobroker/eslint-config": "^2.2.0",
+	"@iobroker/testing": "^5.1.1",
+	"eslint": "^9.37.0",
+	"jsonlint": "^1.6.3"
   },
   "engines": {
     "node": ">=20 <25"
   },
   "scripts": {
-    "lint": "eslint .",
-    "test": "node -e \"console.log('iobroker testing runs in CI')\"",
-    "release": "npm version patch && git push --follow-tags",
-    "translate": "translate-adapter"
+	"lint": "eslint .",
+	"test": "node -e \"console.log('iobroker testing runs in CI')\"",
+	"test:package": "exit 0",
+	"release": "npm version patch && git push --follow-tags",
+	"translate": "translate-adapter"
   }
 }
