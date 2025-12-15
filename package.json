@@ -35,7 +35,7 @@
   "devDependencies": {
 	"@iobroker/eslint-config": "^2.2.0",
 	"@iobroker/testing": "^5.2.2",
-	"eslint": "^9.37.0",
+	"eslint": "^9.39.2",
 	"jsonlint": "^1.6.3"
   },
   "engines": {
