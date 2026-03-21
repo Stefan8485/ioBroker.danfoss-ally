@@ -1,7 +1,7 @@
 {
   "name": "iobroker.danfoss-ally",
-  "version": "0.2.13",
-  "description": "ioBroker adapter for Danfoss Ally™ Cloud API (OAuth2)",
+  "version": "0.2.14",
+  "description": "ioBroker adapter for Danfoss Ally Cloud API (OAuth2)",
   "author": "Stefan Koch <stefan8485@me.com>",
   "license": "MIT",
   "main": "main.js",
@@ -33,20 +33,20 @@
     "axios": "^1.13.2"
   },
   "devDependencies": {
-	"@iobroker/eslint-config": "^2.2.0",
-	"@iobroker/testing": "^5.1.1",
-	"eslint": "^9.37.0",
-	"jsonlint": "^1.6.3"
+    "@iobroker/eslint-config": "^2.2.0",
+    "@iobroker/testing": "^5.1.1",
+    "eslint": "^9.37.0",
+    "jsonlint": "^1.6.3"
   },
   "engines": {
     "node": ">=20 <25"
   },
   "scripts": {
-	"lint": "eslint .",
-	"test": "node -e \"console.log('iobroker testing runs in CI')\"",
-	"test:package": "exit 0",
-	"test:integration": "exit 0",
-	"release": "npm version patch && git push --follow-tags",
-	"translate": "translate-adapter"
+    "lint": "eslint .",
+    "test": "node -e \"console.log('iobroker testing runs in CI')\"",
+    "test:package": "exit 0",
+    "test:integration": "exit 0",
+    "release": "npm version patch && git push --follow-tags",
+    "translate": "translate-adapter"
   }
 }

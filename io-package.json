@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.13",
+    "version": "0.2.14",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,60 +29,44 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
-	   "0.2.13": {
-		"en": "Maintenance release: updated CI/deploy workflow, fixed npm publishing and improved formatting (Prettier/ESLint). No functional changes.",
-		"de": "Wartungsupdate: CI/Deploy-Workflow aktualisiert, npm-Veröffentlichung korrigiert und Formatierung verbessert (Prettier/ESLint). Keine Funktionsänderungen.",
-		"ru": "Технический релиз: обновлены CI/деплой, исправлена публикация npm и улучшено форматирование. Изменений функционала нет.",
-		"pt": "Lançamento de manutenção: CI/deploy atualizado, publicação no npm corrigida e formatação aprimorada. Sem mudanças funcionais.",
-		"nl": "Onderhoudsrelease: CI/deploy bijgewerkt, npm-publicatie verbeterd en formatting verbeterd. Geen functionele wijzigingen.",
-		"fr": "Version de maintenance : CI/deploy mis à jour, publication npm corrigée et formatage amélioré. Aucun changement fonctionnel.",
-		"it": "Release di manutenzione: aggiornato CI/deploy, corretta pubblicazione npm e migliorata la formattazione. Nessuna modifica funzionale.",
-		"es": "Lanzamiento de mantenimiento: CI/deploy actualizado, publicación npm corregida y formato mejorado. Sin cambios funcionales.",
-		"pl": "Wydanie konserwacyjne: zaktualizowano CI/deploy, poprawiono publikację npm i ulepszono formatowanie. Brak zmian funkcjonalnych.",
-		"uk": "Технічний реліз: оновлено CI/deploy, виправлено публікацію npm і покращено форматування. Жодних змін у функціональності.",
-		"zh-cn": "维护版本：更新 CI/部署流程、修复 npm 发布并改进格式。无功能更改。"
-		},
-      "0.2.12": {
-        "en": "Migrated CI to ioBroker standard; reworked state roles; corrected device/status channel structure; replaced timers with adapter.setTimeout/adapter.setInterval; stabilized soft refresh.",
-        "de": "CI auf ioBroker-Standard umgestellt; Rollen überarbeitet; Geräte- und Statuskanäle korrigiert; Timer auf adapter.setTimeout/adapter.setInterval umgestellt; Soft-Refresh stabilisiert.",
-        "ru": "CI перенесено на стандарт ioBroker; переработаны роли; исправлена структура каналов; заменены таймеры; стабилизирован soft refresh.",
-        "pt": "CI migrado para o padrão ioBroker; funções revistas; estrutura de canais corrigida; temporizadores substituídos; soft refresh estabilizado.",
-        "nl": "CI gemigreerd naar ioBroker-standaard; rollen herzien; kanaalstructuur gecorrigeerd; timers vervangen; soft refresh gestabiliseerd.",
-        "fr": "CI migré au standard ioBroker; rôles révisés; structure des canaux corrigée; minuteries remplacées; soft refresh stabilisé.",
-        "it": "CI migrata allo standard ioBroker; ruoli rivisti; struttura dei canali corretta; timer sostituiti; soft refresh stabilizzato.",
-        "es": "CI migrado al estándar ioBroker; roles revisados; estructura de canales corregida; temporizadores reemplazados; soft refresh estabilizado.",
-        "pl": "CI przeniesione do standardu ioBroker; poprawione role; poprawiona struktura kanałów; zastąpiono timery; ustabilizowano soft refresh.",
-        "zh-cn": "CI 迁移到 ioBroker 标准；重新调整角色；修复通道结构；替换定时器；稳定软刷新。"
+      "0.2.14": {
+        "en": "Introduced control channel for writeable states. Status states are now read-only. Improved write handling and stability.",
+        "de": "Neuer control-Kanal für schreibbare States. Status-States sind nun read-only. Verbesserte Write-Logik und Stabilität.",
+        "ru": "Добавлен канал control для записываемых состояний. Status теперь только для чтения.",
+        "pt": "Adicionado canal control para estados graváveis. Status agora somente leitura.",
+        "nl": "Control-kanaal toegevoegd voor schrijfbare states. Status nu alleen-lezen.",
+        "fr": "Ajout d'un canal control pour les états modifiables. Status est désormais en lecture seule.",
+        "it": "Aggiunto canale control per gli stati scrivibili. Status ora è solo lettura.",
+        "es": "Se agregó canal control para estados editables. Status ahora es solo lectura.",
+        "pl": "Dodano kanał control dla zapisywalnych stanów. Status tylko do odczytu.",
+        "uk": "Додано канал control для записуваних станів. Status лише для читання.",
+        "zh-cn": "新增 control 通道用于可写状态，status 现在为只读。"
       },
-      "0.2.11": {
-        "en": "Added full write support for Danfoss Ally",
-        "de": "Vollständige Schreibunterstützung für Danfoss Ally hinzugefügt",
-        "ru": "Добавлена полная поддержка записи для Danfoss Ally.",
-        "pt": "Adicionado suporte completo de gravação para Danfoss Ally",
-        "nl": "Volledige schrijfondersteuning toegevoegd voor Danfoss Ally",
-        "fr": "Ajout d'une prise en charge complète en écriture pour Danfoss Ally",
-        "it": "Aggiunto il supporto di scrittura completo per Danfoss Ally",
-        "es": "Se agregó soporte completo de escritura para Danfoss Ally.",
-        "pl": "Dodano pełną obsługę zapisu dla Danfoss Ally",
-        "uk": "Додано повну підтримку запису для Danfoss Ally",
-        "zh-cn": "添加了对 Danfoss Ally 的完整写入支持"
+      "0.2.13": {
+        "en": "Maintenance release: updated CI/deploy workflow, fixed npm publishing and improved formatting (Prettier/ESLint). No functional changes.",
+        "de": "Wartungsupdate: CI/Deploy-Workflow aktualisiert, npm-Veröffentlichung korrigiert und Formatierung verbessert (Prettier/ESLint). Keine Funktionsänderungen.",
+        "ru": "Технический релиз: обновлены CI/деплой, исправлена публикация npm и улучшено форматирование. Изменений функционала нет.",
+        "pt": "Lançamento de manutenção: CI/deploy atualizado, publicação no npm corrigida e formatação aprimorada. Sem mudanças funcionais.",
+        "nl": "Onderhoudsrelease: CI/deploy bijgewerkt, npm-publicatie verbeterd en formatting verbeterd. Geen functionele wijzigingen.",
+        "fr": "Version de maintenance : CI/deploy mis à jour, publication npm corrigée et formatage amélioré. Aucun changement fonctionnel.",
+        "it": "Release di manutenzione: aggiornato CI/deploy, corretta pubblicazione npm e migliorata la formattazione. Nessuna modifica funzionale.",
+        "es": "Lanzamiento de mantenimiento: CI/deploy actualizado, publicación npm corregida y formato mejorado. Sin cambios funcionales.",
+        "pl": "Wydanie konserwacyjne: zaktualizowano CI/deploy, poprawiono publikację npm i ulepszono formatowanie. Brak zmian funkcjonalnych.",
+        "uk": "Технічний реліз: оновлено CI/deploy, виправлено публікацію npm і покращено форматування. Жодних змін у функціональності.",
+        "zh-cn": "维护版本：更新 CI/部署流程、修复 npm 发布并改进格式。无功能更改。"
       },
-      "0.2.10": {
-        "en": "Translation and ioBroker fixing",
-        "de": "Übersetzung angepasst und änderungen für ioBroker umgesetzt",
-        "ru": "Перевод и исправление ioBroker",
-        "pt": "Tradução e correção do ioBroker",
-        "nl": "Vertaling en ioBroker-fixing",
-        "fr": "Traduction et correction d'ioBroker",
-        "it": "Traduzione e correzione di ioBroker",
-        "es": "Traducción y reparación de ioBroker",
-        "pl": "Tłumaczenie i naprawa ioBrokera",
-        "uk": "Переклад і виправлення ioBroker",
-        "zh-cn": "翻译和 ioBroker 修复"
-      }
     },
-    "authors": ["Stefan Koch <stefan8485@me.com>"],
-    "keywords": ["Danfoss", "Ally", "Heating", "Thermostat", "Humidity", "Cloud"],
+    "authors": [
+      "Stefan Koch <stefan8485@me.com>"
+    ],
+    "keywords": [
+      "Danfoss",
+      "Ally",
+      "Heating",
+      "Thermostat",
+      "Humidity",
+      "Cloud"
+    ],
     "enabled": true,
     "mode": "daemon",
     "licenseInformation": {
@@ -110,7 +94,7 @@
     ],
     "globalDependencies": [
       {
-        "admin": ">=7.6.17"
+        "admin": ">=7.6.20"
       }
     ]
   },
@@ -122,8 +106,14 @@
     "scope": "",
     "pollingInterval": 300
   },
-  "protectedNative": ["apiKey", "apiSecret"],
-  "encryptedNative": ["apiKey", "apiSecret"],
+  "protectedNative": [
+    "apiKey",
+    "apiSecret"
+  ],
+  "encryptedNative": [
+    "apiKey",
+    "apiSecret"
+  ],
   "objects": [],
   "instanceObjects": []
 }

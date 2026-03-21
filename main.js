@@ -217,20 +217,20 @@ class DanfossAlly extends utils.Adapter {
 
       // Auf Schreib-States hören (inkl. Aliasse)
       [
-        "*.temp_set",
-        "*.manual_mode_fast",
-        "*.mode",
-        "*.child_lock",
-        "*.at_home_setting",
-        "*.leaving_home_setting",
-        "*.pause_setting",
-        "*.holiday_setting",
-        "*.SetpointChangeSource",
+        "*.control.temp_set",
+        "*.control.manual_mode_fast",
+        "*.control.mode",
+        "*.control.child_lock",
+        "*.control.at_home_setting",
+        "*.control.leaving_home_setting",
+        "*.control.pause_setting",
+        "*.control.holiday_setting",
+        "*.control.SetpointChangeSource",
         // Aliasse
-        "*.pause_settings",
-        "*.setpoint_change_source",
-        "*.setpointchangesource",
-        "*.setpoint_change"
+        "*.control.pause_settings",
+        "*.control.setpoint_change_source",
+        "*.control.setpointchangesource",
+        "*.control.setpoint_change"
       ].forEach(p => this.subscribeStates(p));
 
       this.log.debug(`Subscribed to write patterns for Danfoss Ally.`);
@@ -285,6 +285,13 @@ class DanfossAlly extends utils.Adapter {
         await this.setObjectNotExistsAsync(`${devPath}.status`, {
           type: "channel",
           common: { name: "Status" },
+          native: {}
+        });
+
+        // Channel "control" unter dem Gerät anlegen (writeable UI-DPs)
+        await this.setObjectNotExistsAsync(`${devPath}.control`, {
+          type: "channel",
+          common: { name: "Control" },
           native: {}
         });
 
@@ -345,7 +352,7 @@ class DanfossAlly extends utils.Adapter {
                 role: this.mapRole(code),
                 unit,
                 read: true,
-                write: WRITEABLE_CODES.has(code)
+                write: false
               },
               native: {}
             });
@@ -355,7 +362,7 @@ class DanfossAlly extends utils.Adapter {
               c.type !== forcedType ||
               c.unit !== (unit || "") ||
               c.read !== true ||
-              c.write !== WRITEABLE_CODES.has(code) ||
+              c.write !== false ||
               c.role !== this.mapRole(code) ||
               c.name !== code;
 
@@ -368,10 +375,59 @@ class DanfossAlly extends utils.Adapter {
                   role: this.mapRole(code),
                   unit,
                   read: true,
-                  write: WRITEABLE_CODES.has(code)
+                  write: false
                 }
               });
             }
+          }
+
+          // Writeable DPs zusätzlich unter ".control.<code>" anlegen
+          if (WRITEABLE_CODES.has(code)) {
+            const cid = `${devPath}.control.${code}`;
+            const existingC = await this.getObjectAsync(cid);
+            const forcedTypeC = TYPE_HINTS.get(code) || forcedType;
+            const unitC = UNIT_HINTS.get(code) || unit;
+
+            if (!existingC) {
+              await this.setObjectAsync(cid, {
+                type: "state",
+                common: {
+                  name: code,
+                  type: forcedTypeC,
+                  role: this.mapRole(code),
+                  unit: unitC,
+                  read: true,
+                  write: true
+                },
+                native: {}
+              });
+            } else {
+              const cc = existingC.common || {};
+              const needExtendC =
+                cc.type !== forcedTypeC ||
+                cc.unit !== (unitC || "") ||
+                cc.read !== true ||
+                cc.write !== true ||
+                cc.role !== this.mapRole(code) ||
+                cc.name !== code;
+
+              if (needExtendC) {
+                await this.extendObjectAsync(cid, {
+                  common: {
+                    ...cc,
+                    name: code,
+                    type: forcedTypeC,
+                    role: this.mapRole(code),
+                    unit: unitC,
+                    read: true,
+                    write: true
+                  }
+                });
+              }
+            }
+
+            // Optional (aber UX-top): control immer mit aktuellem Status synchron halten
+            await this.setStateChangedAsync(cid, value, true);
           }
 
           // Pending-Write-Hold: Poll soll lokale Writes nicht direkt überschreiben
@@ -639,19 +695,35 @@ class DanfossAlly extends utils.Adapter {
     this.log.debug(`WRITE ${id} val=${dval(state.val)}`);
 
     try {
-      // id-Form: "danfoss-ally.0.<deviceId>.<code>"
+      // Nur echte States verarbeiten (Channels/Folders ignorieren)
+      const obj = await this.getObjectAsync(id);
+      if (!obj || obj.type !== "state") {
+        return;
+      }
+
+      // id-Form: "danfoss-ally.0.<deviceId>.control.<code>"
       const nsPrefix = `${this.namespace}.`; // z.B. "danfoss-ally.0."
       if (!id.startsWith(nsPrefix)) {
         return;
       }
 
-      const rel = id.slice(nsPrefix.length); // => "<deviceId>.<code>[.<sub>...]"
-      const [deviceIdRaw, rawCode] = rel.split(".");
-      if (!deviceIdRaw || !rawCode) {
+      const rel = id.slice(nsPrefix.length); // => "<deviceId>.<section>.<code>[.<sub>...]"
+      const parts = rel.split(".");
+      const deviceIdRaw = parts[0];
+      if (!deviceIdRaw || parts.length < 3) {
         return;
       }
 
       const deviceId = this.sanitizeId(deviceIdRaw);
+      const section = parts[1];
+
+      // Nur Writes auf ".control.<code>" akzeptieren
+      if (section !== "control") {
+        this.log.debug(`Ignoring write outside control channel: ${id}`);
+        return;
+      }
+
+      const rawCode = parts[2];
       const code = this.sanitizeId(normalizeCode(rawCode));
       let val = state.val;
 
@@ -697,11 +769,19 @@ class DanfossAlly extends utils.Adapter {
         }
 
         await this.sendOne(deviceId, "temp_set", v10);
-        await this.setStateAsync(`${deviceId}.temp_set`, {
+        await this.setStateAsync(`${deviceId}.status.temp_set`, {
           val: Number(val),
           ack: true
         });
-        await this.setStateAsync(`${deviceId}.manual_mode_fast`, {
+        await this.setStateAsync(`${deviceId}.status.manual_mode_fast`, {
+          val: Number(val),
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.temp_set`, {
+          val: Number(val),
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.manual_mode_fast`, {
           val: Number(val),
           ack: true
         });
@@ -721,7 +801,11 @@ class DanfossAlly extends utils.Adapter {
         }
 
         await this.sendOne(deviceId, "temp_set", v10);
-        await this.setStateAsync(`${deviceId}.temp_set`, {
+        await this.setStateAsync(`${deviceId}.status.temp_set`, {
+          val: Number(val),
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.temp_set`, {
           val: Number(val),
           ack: true
         });
@@ -741,7 +825,11 @@ class DanfossAlly extends utils.Adapter {
         }
 
         await this.sendOne(deviceId, code, v10);
-        await this.setStateAsync(`${deviceId}.${code}`, {
+        await this.setStateAsync(`${deviceId}.status.${code}`, {
+          val: Number(val),
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.${code}`, {
           val: Number(val),
           ack: true
         });
@@ -760,7 +848,11 @@ class DanfossAlly extends utils.Adapter {
         } catch {
           await this.sendOne(deviceId, "child_lock", !!boolVal);
         }
-        await this.setStateAsync(`${deviceId}.child_lock`, {
+        await this.setStateAsync(`${deviceId}.status.child_lock`, {
+          val: !!boolVal,
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.child_lock`, {
           val: !!boolVal,
           ack: true
         });
@@ -775,7 +867,11 @@ class DanfossAlly extends utils.Adapter {
       if (code === "mode") {
         const next = normalizeMode(String(val));
         await this.sendOne(deviceId, "mode", next);
-        await this.setStateAsync(`${deviceId}.mode`, {
+        await this.setStateAsync(`${deviceId}.status.mode`, {
+          val: next,
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.mode`, {
           val: next,
           ack: true
         });
@@ -793,7 +889,11 @@ class DanfossAlly extends utils.Adapter {
         const src = allowed.has(v) ? v : "Externally";
 
         await this.sendOne(deviceId, "SetpointChangeSource", src);
-        await this.setStateAsync(`${deviceId}.SetpointChangeSource`, {
+        await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+          val: src,
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
           val: src,
           ack: true
         });
