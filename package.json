@@ -39,7 +39,7 @@
 	"jsonlint": "^1.6.3"
   },
   "engines": {
-    "node": ">=20 <25"
+    "node": ">=22 <25"
   },
   "scripts": {
     "lint": "eslint .",
