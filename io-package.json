@@ -30,19 +30,19 @@
     },
     "news": {
       "0.2.15": {
-		  "en": "Fixed invalid io-package.json (JSON syntax error). Adapter is now valid again and restored in the repository. No functional changes.",
-		  "de": "Fehler in io-package.json (ungültiges JSON) behoben. Adapter ist wieder gültig und im Repository verfügbar. Keine Funktionsänderungen.",
-		  "ru": "Исправлена ошибка в io-package.json (некорректный JSON). Адаптер снова корректен и доступен в репозитории. Без функциональных изменений.",
-		  "pt": "Corrigido erro em io-package.json (JSON inválido). Adaptador novamente válido e disponível no repositório. Sem alterações funcionais.",
-		  "nl": "Fout in io-package.json (ongeldige JSON) opgelost. Adapter is weer geldig en beschikbaar in de repository. Geen functionele wijzigingen.",
-		  "fr": "Correction d'une erreur dans io-package.json (JSON invalide). L'adaptateur est à nouveau valide et disponible dans le dépôt. Aucun changement fonctionnel.",
-		  "it": "Corretto errore in io-package.json (JSON non valido). L'adapter è nuovamente valido e disponibile nel repository. Nessuna modifica funzionale.",
-		  "es": "Corregido error en io-package.json (JSON inválido). El adaptador vuelve a ser válido y disponible en el repositorio. Sin cambios funcionales.",
-		  "pl": "Naprawiono błąd w io-package.json (nieprawidłowy JSON). Adapter ponownie poprawny i dostępny w repozytorium. Brak zmian funkcjonalnych.",
-		  "uk": "Виправлено помилку в io-package.json (некоректний JSON). Адаптер знову валідний і доступний у репозиторії. Без функціональних змін.",
-		  "zh-cn": "修复 io-package.json 中的错误（无效 JSON）。适配器现已恢复正常并重新加入仓库。无功能更改。"
-		},
-	  "0.2.14": {
+        "en": "Fixed invalid io-package.json (JSON syntax error). Adapter is now valid again and restored in the repository. No functional changes.",
+        "de": "Fehler in io-package.json (ungültiges JSON) behoben. Adapter ist wieder gültig und im Repository verfügbar. Keine Funktionsänderungen.",
+        "ru": "Исправлена ошибка в io-package.json (некорректный JSON). Адаптер снова корректен и доступен в репозитории. Без функциональных изменений.",
+        "pt": "Corrigido erro em io-package.json (JSON inválido). Adaptador novamente válido e disponível no repositório. Sem alterações funcionais.",
+        "nl": "Fout in io-package.json (ongeldige JSON) opgelost. Adapter is weer geldig en beschikbaar in de repository. Geen functionele wijzigingen.",
+        "fr": "Correction d'une erreur dans io-package.json (JSON invalide). L'adaptateur est à nouveau valide et disponible dans le dépôt. Aucun changement fonctionnel.",
+        "it": "Corretto errore in io-package.json (JSON non valido). L'adapter è nuovamente valido e disponibile nel repository. Nessuna modifica funzionale.",
+        "es": "Corregido error en io-package.json (JSON inválido). El adaptador vuelve a ser válido y disponible en el repositorio. Sin cambios funcionales.",
+        "pl": "Naprawiono błąd w io-package.json (nieprawidłowy JSON). Adapter ponownie poprawny i dostępny w repozytorium. Brak zmian funkcjonalnych.",
+        "uk": "Виправлено помилку в io-package.json (некоректний JSON). Адаптер знову валідний і доступний у репозиторії. Без функціональних змін.",
+        "zh-cn": "修复 io-package.json 中的错误（无效 JSON）。适配器现已恢复正常并重新加入仓库。无功能更改。"
+      },
+      "0.2.14": {
         "en": "Introduced control channel for writeable states. Status states are now read-only. Improved write handling and stability.",
         "de": "Neuer control-Kanal für schreibbare States. Status-States sind nun read-only. Verbesserte Write-Logik und Stabilität.",
         "ru": "Добавлен канал control для записываемых состояний. Status теперь только для чтения.",
