@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally ![version](https://img.shields.io/badge/version-0.2.14-blue) [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)
+# ioBroker.danfoss-ally ![version](https://img.shields.io/badge/version-0.2.15-blue) [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
 [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=flat&data=d&color=blue)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
@@ -286,6 +286,11 @@ All send, retry, and confirm logs appear at debug level.
 ---
 
 ## Changelog
+
+
+### 0.2.15
+- Fixed invalid `io-package.json` (JSON syntax error)
+- No functional changes
 
 ### 0.2.14
 - Introduced `control` channel for writable states
