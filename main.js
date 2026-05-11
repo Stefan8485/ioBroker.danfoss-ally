@@ -20,16 +20,16 @@ const TYPE_HINTS = new Map([
   ["pause_setting", "number"],
   ["holiday_setting", "number"],
   ["manual_mode_fast", "number"],
-  ["MeasuredValue", "number"],     // Zigbee Faktor ×10 (Ist-Temperatur)
+  ["MeasuredValue", "number"], // Zigbee Faktor ×10 (Ist-Temperatur)
 
   // Zahlen (°C) — Zigbee Thermostat Cluster Faktor ×100
-  ["OccupiedSetpoint", "number"],  // ACHTUNG: /100, nicht /10!
+  ["OccupiedSetpoint", "number"], // ACHTUNG: /100, nicht /10!
 
   // Zahlen (% / sonstige)
   ["humidity_value", "number"],
   ["battery_percentage", "number"],
-  ["pi_heating_demand", "number"],  // 0–100 % Heizleistung
-  ["ext_measured_rs", "number"],    // Bodensensor-Widerstand mΩ, -8000=kein Sensor
+  ["pi_heating_demand", "number"], // 0–100 % Heizleistung
+  ["ext_measured_rs", "number"], // Bodensensor-Widerstand mΩ, -8000=kein Sensor
 
   // Bool
   ["child_lock", "boolean"],
@@ -347,7 +347,7 @@ class DanfossAlly extends utils.Adapter {
             "pause_setting",
             "holiday_setting",
             "manual_mode_fast",
-            "MeasuredValue"  // Zigbee Ist-Temp ebenfalls ×10
+            "MeasuredValue" // Zigbee Ist-Temp ebenfalls ×10
           ];
           if (tempLike.includes(code) && typeof value === "number") {
             value = value / 10;
@@ -1060,8 +1060,11 @@ class DanfossAlly extends utils.Adapter {
     }
 
     // Bodensensor / Wärme / Betriebszustand
-    if (["heat_available", "floor_sensor", "mounting_mode_active",
-         "radiator_covered", "load_balance_enable"].includes(code)) {
+    if (
+      ["heat_available", "floor_sensor", "mounting_mode_active", "radiator_covered", "load_balance_enable"].includes(
+        code
+      )
+    ) {
       return "indicator";
     }
 
