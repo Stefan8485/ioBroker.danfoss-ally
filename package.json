@@ -1,6 +1,6 @@
 {
   "name": "iobroker.danfoss-ally",
-  "version": "0.2.15",
+  "version": "0.2.16",
   "description": "ioBroker adapter for Danfoss Ally Cloud API (OAuth2)",
   "author": "Stefan Koch <stefan8485@me.com>",
   "license": "MIT",
@@ -36,11 +36,11 @@
     "@iobroker/adapter-dev": "^1.5.0",
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/testing": "^5.2.2",
-    "eslint": "^9.39.0",
+    "eslint": "^10.2.0",
     "jsonlint": "^1.6.3"
   },
   "engines": {
-    "node": ">=22 <25"
+    "node": ">=22 <26"
   },
   "scripts": {
     "lint": "eslint .",
@@ -49,5 +49,9 @@
     "test:integration": "exit 0",
     "release": "npm version patch && git push --follow-tags",
     "translate": "translate-adapter"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/Stefan8485/ioBroker.danfoss-ally/issues"
+  },
+  "homepage": "https://github.com/Stefan8485/ioBroker.danfoss-ally#readme"
 }

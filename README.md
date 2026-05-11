@@ -1,4 +1,4 @@
-# ioBroker.danfoss-ally ![version](https://img.shields.io/badge/version-0.2.15-blue) [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)
+# ioBroker.danfoss-ally ![version](https://img.shields.io/badge/version-0.2.16-blue) [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=shields)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
 [![NPM](https://nodei.co/npm/iobroker.danfoss-ally.svg?style=flat&data=d&color=blue)](https://nodei.co/npm/iobroker.danfoss-ally/)
 
@@ -39,8 +39,10 @@ and **allows targeted single writes** without forced mode changes or chained seq
 
 ## Supported Devices
 
+- Danfoss Ally™ TRV (Radiator thermostats)
 - Danfoss Icon2 RT (Room thermostats)
 - Danfoss Icon2 Controller
+- Danfoss Ally™ Boiler Relay
 - Danfoss Ally™ Gateway  
   _(other Danfoss devices auto-discovered)_
 
@@ -287,23 +289,16 @@ All send, retry, and confirm logs appear at debug level.
 
 ## Changelog
 
+### 0.2.16
+- Fixed `temp_set` for Ally TRVs (`SetpointChangeSource=Externally` auto-sent)
+- Fixed wrong path for `lower_temp`/`upper_temp` clamp
+- Fixed `OccupiedSetpoint` scaling (÷100 instead of ÷10)
+- Added type hints for 16 new data points (`MeasuredValue`, `pi_heating_demand`, `window_state`, etc.)
+- `Icon2 switch` state is now writable
+- Fixed jsonConfig admin validation warning (missing `size` property)
+- Added Boiler Relay to supported devices
 
-### 0.2.15
-- Fixed invalid `io-package.json` (JSON syntax error)
-- No functional changes
-
-### 0.2.14
-- Introduced `control` channel for writable states
-- `status` channel is now strictly read-only
-- Improved write detection and state handling
-- Prevented writes to channels or non-state objects
-- Improved adapter stability
-
-### 0.2.13
-- Updated CI & deploy workflow
-- Fixed npm publishing process
-- Improved code formatting (Prettier / ESLint)
-- No functional changes for end users
+[Older changes](CHANGELOG_OLD.md)
 
 
 ---

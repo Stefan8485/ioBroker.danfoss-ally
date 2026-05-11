@@ -10,7 +10,7 @@ const TEMP_EPS = 0.05; // °C-Toleranz zum Abgleich mit Cloud
 
 // Typ-/Einheits-Hints halten die Objekte stabil (kein Typflip bei wechselnden API-Rückgaben)
 const TYPE_HINTS = new Map([
-  // Zahlen (°C)
+  // Zahlen (°C) — Danfoss Ally API Faktor ×10
   ["temp_current", "number"],
   ["temp_set", "number"],
   ["upper_temp", "number"],
@@ -20,20 +20,38 @@ const TYPE_HINTS = new Map([
   ["pause_setting", "number"],
   ["holiday_setting", "number"],
   ["manual_mode_fast", "number"],
+  ["MeasuredValue", "number"],     // Zigbee Faktor ×10 (Ist-Temperatur)
 
-  // Zahlen (%)
+  // Zahlen (°C) — Zigbee Thermostat Cluster Faktor ×100
+  ["OccupiedSetpoint", "number"],  // ACHTUNG: /100, nicht /10!
+
+  // Zahlen (% / sonstige)
   ["humidity_value", "number"],
   ["battery_percentage", "number"],
+  ["pi_heating_demand", "number"],  // 0–100 % Heizleistung
+  ["ext_measured_rs", "number"],    // Bodensensor-Widerstand mΩ, -8000=kein Sensor
 
   // Bool
   ["child_lock", "boolean"],
+  ["floor_sensor", "boolean"],
+  ["heat_available", "boolean"],
+  ["load_balance_enable", "boolean"],
+  ["mounting_mode_active", "boolean"],
+  ["radiator_covered", "boolean"],
+  ["switch", "boolean"],
+  ["switch_state", "boolean"],
+  ["window_toggle", "boolean"],
 
   // Strings (Enums/Text)
   ["mode", "string"],
   ["SetpointChangeSource", "string"],
   ["work_state", "string"],
   ["output_status", "string"],
-  ["fault", "string"]
+  ["fault", "string"],
+  ["system_status_water", "string"],
+  ["temp_mode", "string"],
+  ["window_state", "string"],
+  ["window_state_info", "string"]
 ]);
 
 const UNIT_HINTS = new Map([
@@ -47,7 +65,10 @@ const UNIT_HINTS = new Map([
   ["holiday_setting", "°C"],
   ["humidity_value", "%"],
   ["battery_percentage", "%"],
-  ["manual_mode_fast", "°C"]
+  ["manual_mode_fast", "°C"],
+  ["MeasuredValue", "°C"],
+  ["OccupiedSetpoint", "°C"],
+  ["pi_heating_demand", "%"]
 ]);
 
 // Beschreibbare States
@@ -60,7 +81,8 @@ const WRITEABLE_CODES = new Set([
   "holiday_setting",
   "mode",
   "child_lock",
-  "SetpointChangeSource"
+  "SetpointChangeSource",
+  "switch" // Icon2: Zone Ein/Aus
 ]);
 
 /** ------- Alias-/Normalisierung ------- */
@@ -314,6 +336,7 @@ class DanfossAlly extends utils.Adapter {
 
           // Skalierung in reale Einheiten
           let value = rawValue;
+          // Skalierung: Ally API Faktor ×10 → °C
           const tempLike = [
             "temp_current",
             "temp_set",
@@ -323,10 +346,15 @@ class DanfossAlly extends utils.Adapter {
             "leaving_home_setting",
             "pause_setting",
             "holiday_setting",
-            "manual_mode_fast"
+            "manual_mode_fast",
+            "MeasuredValue"  // Zigbee Ist-Temp ebenfalls ×10
           ];
           if (tempLike.includes(code) && typeof value === "number") {
             value = value / 10;
+          }
+          // Zigbee Thermostat Cluster OccupiedSetpoint: Faktor ×100
+          if (code === "OccupiedSetpoint" && typeof value === "number") {
+            value = value / 100;
           }
           if (code === "humidity_value" && typeof value === "number") {
             value = value / 10;
@@ -553,10 +581,14 @@ class DanfossAlly extends utils.Adapter {
           "leaving_home_setting",
           "pause_setting",
           "holiday_setting",
-          "manual_mode_fast"
+          "manual_mode_fast",
+          "MeasuredValue"
         ];
         if (tempLike.includes(code) && typeof value === "number") {
           value = value / 10;
+        }
+        if (code === "OccupiedSetpoint" && typeof value === "number") {
+          value = value / 100;
         }
         if (code === "humidity_value" && typeof value === "number") {
           value = value / 10;
@@ -738,8 +770,9 @@ class DanfossAlly extends utils.Adapter {
           return null;
         }
 
-        const lower = await this.getStateAsync(`${deviceId}.lower_temp`);
-        const upper = await this.getStateAsync(`${deviceId}.upper_temp`);
+        // FIX v0.2.16: Korrekter Pfad mit .status.-Prefix
+        const lower = await this.getStateAsync(`${deviceId}.status.lower_temp`);
+        const upper = await this.getStateAsync(`${deviceId}.status.upper_temp`);
 
         const before = target;
         if (lower && typeof lower.val === "number") {
@@ -761,11 +794,20 @@ class DanfossAlly extends utils.Adapter {
       // ==== Schreiblogik (einzeln, ohne Auto-Sequenzen) ====
 
       // manual_mode_fast -> temp_set (Shortcut, kein Moduswechsel)
+      // v0.2.16: SetpointChangeSource="Externally" wird immer mitgeschickt
       if (code === "manual_mode_fast") {
         const v10 = await prepareTempValue10(val);
         if (v10 == null) {
           this.log.warn(`Ignoring invalid temperature for ${deviceId}.${code}: ${val}`);
           return;
+        }
+
+        // SetpointChangeSource auf Externally setzen
+        try {
+          await this.sendOne(deviceId, "SetpointChangeSource", "Externally");
+          this.log.debug(`SetpointChangeSource=Externally sent for ${deviceId}`);
+        } catch (e) {
+          this.log.debug(`SetpointChangeSource pre-set failed for ${deviceId}: ${e.message} (continuing)`);
         }
 
         await this.sendOne(deviceId, "temp_set", v10);
@@ -785,14 +827,26 @@ class DanfossAlly extends utils.Adapter {
           val: Number(val),
           ack: true
         });
+        await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+          val: "Externally",
+          ack: true
+        }).catch(() => {});
+        await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
+          val: "Externally",
+          ack: true
+        }).catch(() => {});
+
         this._noteWrite(deviceId, "temp_set", Number(val));
+        this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
 
         this._softRefreshSoon(deviceId, "temp_set");
-        this.log.info(`Set temp_set via manual_mode_fast for ${deviceId}`);
+        this.log.info(`Set temp_set via manual_mode_fast for ${deviceId} (with SetpointChangeSource=Externally)`);
         return;
       }
 
       // temp_set (kein Moduswechsel)
+      // v0.2.16: SetpointChangeSource="Externally" wird immer mitgeschickt,
+      // da Ally TRV-Thermostate temp_set ohne dieses Flag ignorieren können.
       if (code === "temp_set") {
         const v10 = await prepareTempValue10(val);
         if (v10 == null) {
@@ -800,6 +854,15 @@ class DanfossAlly extends utils.Adapter {
           return;
         }
 
+        // Schritt 1: SetpointChangeSource auf Externally setzen (nötig für Ally TRVs)
+        try {
+          await this.sendOne(deviceId, "SetpointChangeSource", "Externally");
+          this.log.debug(`SetpointChangeSource=Externally sent for ${deviceId}`);
+        } catch (e) {
+          this.log.debug(`SetpointChangeSource pre-set failed for ${deviceId}: ${e.message} (continuing)`);
+        }
+
+        // Schritt 2: temp_set schicken
         await this.sendOne(deviceId, "temp_set", v10);
         await this.setStateAsync(`${deviceId}.status.temp_set`, {
           val: Number(val),
@@ -809,10 +872,21 @@ class DanfossAlly extends utils.Adapter {
           val: Number(val),
           ack: true
         });
+        // Status-Spiegel für SetpointChangeSource
+        await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+          val: "Externally",
+          ack: true
+        }).catch(() => {});
+        await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
+          val: "Externally",
+          ack: true
+        }).catch(() => {});
+
         this._noteWrite(deviceId, "temp_set", Number(val));
+        this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
 
         this._softRefreshSoon(deviceId, "temp_set");
-        this.log.info(`Set temp_set for ${deviceId}`);
+        this.log.info(`Set temp_set for ${deviceId} (with SetpointChangeSource=Externally)`);
         return;
       }
 
@@ -860,6 +934,29 @@ class DanfossAlly extends utils.Adapter {
 
         this._softRefreshSoon(deviceId, "child_lock");
         this.log.info(`Set child_lock=${!!boolVal} for ${deviceId}`);
+        return;
+      }
+
+      // switch (Icon2 Zone Ein/Aus)
+      if (code === "switch") {
+        const boolVal = val === true || val === "true" || val === 1;
+        try {
+          await this.sendOne(deviceId, "switch", boolVal);
+        } catch (e) {
+          this.log.warn(`switch write failed for ${deviceId}: ${e.message}`);
+          return;
+        }
+        await this.setStateAsync(`${deviceId}.status.switch`, {
+          val: boolVal,
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.switch`, {
+          val: boolVal,
+          ack: true
+        });
+        this._noteWrite(deviceId, "switch", boolVal);
+        this._softRefreshSoon(deviceId, "switch");
+        this.log.info(`Set switch=${boolVal} for ${deviceId}`);
         return;
       }
 
@@ -957,6 +1054,48 @@ class DanfossAlly extends utils.Adapter {
       return "state";
     }
 
+    // Heizleistung
+    if (code === "pi_heating_demand") {
+      return "value.percentage";
+    }
+
+    // Bodensensor / Wärme / Betriebszustand
+    if (["heat_available", "floor_sensor", "mounting_mode_active",
+         "radiator_covered", "load_balance_enable"].includes(code)) {
+      return "indicator";
+    }
+
+    // Fenstererkennung
+    if (code === "window_state" || code === "window_state_info") {
+      return "sensor.window";
+    }
+    if (code === "window_toggle") {
+      return "button";
+    }
+
+    // Switch (Icon2 Zone)
+    if (code === "switch") {
+      return "switch";
+    }
+    if (code === "switch_state") {
+      return "indicator";
+    }
+
+    // Messwerte Zigbee
+    if (code === "MeasuredValue" || code === "OccupiedSetpoint") {
+      return "value.temperature";
+    }
+
+    // Bodensensor Widerstand
+    if (code === "ext_measured_rs") {
+      return "value";
+    }
+
+    // Systemstatus
+    if (code === "system_status_water" || code === "temp_mode") {
+      return "state";
+    }
+
     // Fallback
     return "state";
   }
@@ -972,8 +1111,11 @@ class DanfossAlly extends utils.Adapter {
       holiday_setting: "°C",
       lower_temp: "°C",
       upper_temp: "°C",
+      MeasuredValue: "°C",
+      OccupiedSetpoint: "°C",
       humidity_value: "%",
-      battery_percentage: "%"
+      battery_percentage: "%",
+      pi_heating_demand: "%"
     };
     return units[code] || "";
   }

@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.15",
+    "version": "0.2.16",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,19 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.16": {
+        "en": "Fixed temp_set for Ally TRVs (SetpointChangeSource=Externally auto-sent). Fixed lower/upper_temp clamp path bug. Fixed OccupiedSetpoint scaling (÷100). Added type hints for 16 new data points (MeasuredValue, pi_heating_demand, window_state, etc.). Icon2 switch is now writable. Fixed jsonConfig admin validation warning.",
+        "de": "Fehler bei temp_set für Ally TRVs behoben (SetpointChangeSource=Externally wird automatisch mitgesendet). Falschen Pfad für lower/upper_temp Clamp behoben. Skalierung von OccupiedSetpoint korrigiert (÷100). Typ-Definitionen für 16 neue Datenpunkte ergänzt (MeasuredValue, pi_heating_demand, window_state usw.). Icon2 switch jetzt schreibbar. jsonConfig Admin-Validierungswarnung behoben.",
+        "ru": "Исправлена запись temp_set для Ally TRV (SetpointChangeSource=Externally отправляется автоматически). Исправлен путь для clamp lower/upper_temp. Исправлено масштабирование OccupiedSetpoint (÷100). Добавлены типы для 16 новых точек данных. switch для Icon2 теперь доступен для записи.",
+        "pt": "Corrigido temp_set para TRVs Ally (SetpointChangeSource=Externally enviado automaticamente). Corrigido caminho de clamp lower/upper_temp. Escalamento OccupiedSetpoint corrigido (÷100). Adicionados tipos para 16 novos pontos de dados. switch do Icon2 agora é gravável.",
+        "nl": "temp_set voor Ally TRVs gecorrigeerd (SetpointChangeSource=Externally automatisch verzonden). Pad voor lower/upper_temp clamp gecorrigeerd. OccupiedSetpoint schaling gecorrigeerd (÷100). Typen voor 16 nieuwe datapunten toegevoegd. Icon2 switch nu schrijfbaar.",
+        "fr": "Correction de temp_set pour les TRV Ally (SetpointChangeSource=Externally envoyé automatiquement). Correction du chemin de clamp lower/upper_temp. Mise à l'échelle OccupiedSetpoint corrigée (÷100). Types ajoutés pour 16 nouveaux points de données. Le switch Icon2 est maintenant accessible en écriture.",
+        "it": "Corretto temp_set per Ally TRV (SetpointChangeSource=Externally inviato automaticamente). Corretto il percorso clamp lower/upper_temp. Scalatura OccupiedSetpoint corretta (÷100). Aggiunti tipi per 16 nuovi punti dati. switch Icon2 ora scrivibile.",
+        "es": "Corregido temp_set para Ally TRVs (SetpointChangeSource=Externally enviado automáticamente). Corregida ruta de clamp lower/upper_temp. Escalado OccupiedSetpoint corregido (÷100). Añadidos tipos para 16 nuevos puntos de datos. switch Icon2 ahora escribible.",
+        "pl": "Naprawiono temp_set dla Ally TRV (SetpointChangeSource=Externally wysyłane automatycznie). Naprawiono ścieżkę clamp lower/upper_temp. Naprawiono skalowanie OccupiedSetpoint (÷100). Dodano typy dla 16 nowych punktów danych. Przełącznik Icon2 teraz zapisywalny.",
+        "uk": "Виправлено temp_set для Ally TRV (SetpointChangeSource=Externally надсилається автоматично). Виправлено шлях clamp lower/upper_temp. Виправлено масштабування OccupiedSetpoint (÷100). Додано типи для 16 нових точок даних. switch Icon2 тепер записуваний.",
+        "zh-cn": "修复 Ally TRV 的 temp_set（自动发送 SetpointChangeSource=Externally）。修复 lower/upper_temp clamp 路径错误。修复 OccupiedSetpoint 缩放（÷100）。为 16 个新数据点添加类型。Icon2 switch 现可写入。"
+      },
       "0.2.15": {
         "en": "Fixed invalid io-package.json (JSON syntax error). Adapter is now valid again and restored in the repository. No functional changes.",
         "de": "Fehler in io-package.json (ungültiges JSON) behoben. Adapter ist wieder gültig und im Repository verfügbar. Keine Funktionsänderungen.",
