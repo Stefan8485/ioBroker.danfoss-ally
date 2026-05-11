@@ -21,7 +21,7 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: ioBroker/testing-action-check@v1
+      - uses: ioBroker/testing-action-check@v2
         with:
           node-version: '24.x'
           lint: true
@@ -43,6 +43,8 @@ jobs:
         node-version: [22.x, 24.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: ioBroker/testing-action-adapter@v1
         with:
@@ -69,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: ioBroker/testing-action-deploy@v1
+      - uses: ioBroker/testing-action-deploy@v1.5.0
         with:
           node-version: '24.x'
           github-token: ${{ secrets.GITHUB_TOKEN }}
