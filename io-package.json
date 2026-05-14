@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.16",
+    "version": "0.2.17",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,19 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.17": {
+        "en": "Improved Ally TRV setpoint writes by sending SetpointChangeSource and temp_set as one combined command before falling back to temp_set only. Fixed switch subscriptions for Icon2/Boiler Relay control. Added Occupied_Setpoint alias handling and fixed jsonConfig header validation.",
+        "de": "Sollwert-Schreiben für Ally TRVs verbessert: SetpointChangeSource und temp_set werden zuerst gemeinsam gesendet, mit Fallback auf temp_set allein. switch-Abos für Icon2/Boiler Relay Control behoben. Occupied_Setpoint-Alias ergänzt und jsonConfig Header-Validierung korrigiert.",
+        "ru": "Улучшена запись уставки для Ally TRV: SetpointChangeSource и temp_set сначала отправляются одной командой, затем используется fallback только на temp_set. Исправлены подписки switch для Icon2/Boiler Relay. Добавлен алиас Occupied_Setpoint и исправлена проверка заголовка jsonConfig.",
+        "pt": "Melhorada a escrita de setpoint para Ally TRVs: SetpointChangeSource e temp_set são enviados primeiro em um comando combinado, com fallback para apenas temp_set. Corrigidas assinaturas switch para Icon2/Boiler Relay. Adicionado alias Occupied_Setpoint e corrigida validação do cabeçalho jsonConfig.",
+        "nl": "Schrijven van setpoints voor Ally TRV's verbeterd: SetpointChangeSource en temp_set worden eerst gecombineerd verzonden, met fallback naar alleen temp_set. switch-abonnementen voor Icon2/Boiler Relay opgelost. Occupied_Setpoint-alias toegevoegd en jsonConfig header-validatie gecorrigeerd.",
+        "fr": "Amélioration de l'écriture du point de consigne pour les Ally TRV : SetpointChangeSource et temp_set sont d'abord envoyés ensemble, avec repli sur temp_set seul. Correction des abonnements switch pour Icon2/Boiler Relay. Alias Occupied_Setpoint ajouté et validation de l'en-tête jsonConfig corrigée.",
+        "it": "Migliorata la scrittura del setpoint per Ally TRV: SetpointChangeSource e temp_set vengono inviati prima insieme, con fallback al solo temp_set. Corrette le sottoscrizioni switch per Icon2/Boiler Relay. Aggiunto alias Occupied_Setpoint e corretta la validazione dell'header jsonConfig.",
+        "es": "Mejorada la escritura de consigna para Ally TRV: SetpointChangeSource y temp_set se envían primero juntos, con fallback a solo temp_set. Corregidas las suscripciones switch para Icon2/Boiler Relay. Añadido alias Occupied_Setpoint y corregida la validación del encabezado jsonConfig.",
+        "pl": "Ulepszono zapis nastawy dla Ally TRV: SetpointChangeSource i temp_set są najpierw wysyłane razem, z fallbackiem do samego temp_set. Naprawiono subskrypcje switch dla Icon2/Boiler Relay. Dodano alias Occupied_Setpoint i poprawiono walidację nagłówka jsonConfig.",
+        "uk": "Покращено запис заданої температури для Ally TRV: SetpointChangeSource і temp_set спочатку надсилаються разом, із fallback на лише temp_set. Виправлено підписки switch для Icon2/Boiler Relay. Додано alias Occupied_Setpoint і виправлено валідацію заголовка jsonConfig.",
+        "zh-cn": "改进 Ally TRV 设定温度写入：先将 SetpointChangeSource 和 temp_set 作为组合命令发送，失败时回退为仅发送 temp_set。修复 Icon2/Boiler Relay 的 switch 订阅。添加 Occupied_Setpoint 别名并修复 jsonConfig 标题验证。"
+      },
       "0.2.16": {
         "en": "Fixed temp_set for Ally TRVs (SetpointChangeSource=Externally auto-sent). Fixed lower/upper_temp clamp path bug. Fixed OccupiedSetpoint scaling (÷100). Added type hints for 16 new data points (MeasuredValue, pi_heating_demand, window_state, etc.). Icon2 switch is now writable. Fixed jsonConfig admin validation warning.",
         "de": "Fehler bei temp_set für Ally TRVs behoben (SetpointChangeSource=Externally wird automatisch mitgesendet). Falschen Pfad für lower/upper_temp Clamp behoben. Skalierung von OccupiedSetpoint korrigiert (÷100). Typ-Definitionen für 16 neue Datenpunkte ergänzt (MeasuredValue, pi_heating_demand, window_state usw.). Icon2 switch jetzt schreibbar. jsonConfig Admin-Validierungswarnung behoben.",

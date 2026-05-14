@@ -277,17 +277,24 @@ Optional: `X-App-Key`, `X-Tenant-Id`, etc.
 
 ## Writes
 
-- One command per state (no mode chaining)
+- Single writes by default; `temp_set` first tries a combined `SetpointChangeSource` + `temp_set` command
 - Mode + temperature must be written separately
 - Values are clamped to allowed limits, scaled ×10
 - `child_lock`: tries `0/1`, retries `true/false` on 400 error
-- `SetpointChangeSource`: optional; defaults to `"Externally"` when manual modes are active
+- `SetpointChangeSource`: optional; `temp_set` attempts `"Externally"` for Ally TRVs
 
 All send, retry, and confirm logs appear at debug level.
 
 ---
 
 ## Changelog
+
+### 0.2.17
+- Improved Ally TRV `temp_set` writes by trying `SetpointChangeSource=Externally` and `temp_set` as one combined command first
+- Falls back to `temp_set` only if Danfoss rejects the combined command
+- Fixed `control.switch` subscriptions for Icon2 / Boiler Relay writes
+- Added alias handling for `Occupied_Setpoint`
+- Fixed jsonConfig header validation warning
 
 ### 0.2.16
 - Fixed `temp_set` for Ally TRVs (`SetpointChangeSource=Externally` auto-sent)

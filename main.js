@@ -87,6 +87,8 @@ const WRITEABLE_CODES = new Set([
 
 /** ------- Alias-/Normalisierung ------- */
 const CODE_ALIASES = new Map([
+  ["occupied_setpoint", "OccupiedSetpoint"],
+  ["occupiedsetpoint", "OccupiedSetpoint"],
   ["pause_settings", "pause_setting"],
   ["pause", "pause_setting"], // falls jemand nur "pause" schreibt
   ["setpoint_change_source", "SetpointChangeSource"],
@@ -239,16 +241,7 @@ class DanfossAlly extends utils.Adapter {
 
       // Auf Schreib-States hören (inkl. Aliasse)
       [
-        "*.control.temp_set",
-        "*.control.manual_mode_fast",
-        "*.control.mode",
-        "*.control.child_lock",
-        "*.control.at_home_setting",
-        "*.control.leaving_home_setting",
-        "*.control.pause_setting",
-        "*.control.holiday_setting",
-        "*.control.SetpointChangeSource",
-        // Aliasse
+        ...Array.from(WRITEABLE_CODES, code => `*.control.${code}`),
         "*.control.pause_settings",
         "*.control.setpoint_change_source",
         "*.control.setpointchangesource",
@@ -544,7 +537,9 @@ class DanfossAlly extends utils.Adapter {
           ? raw.status
           : Array.isArray(raw)
             ? raw
-            : [];
+            : raw && typeof raw === "object"
+              ? Object.entries(raw).map(([code, value]) => ({ code, value }))
+              : [];
 
       const devPath = `${deviceId}`;
 
@@ -655,6 +650,30 @@ class DanfossAlly extends utils.Adapter {
   }
 
   /**
+   * Hilfsfunktion: mehrere Befehle in einem Cloud-Request senden.
+   *
+   * @param deviceId
+   * @param commands
+   */
+  async sendCommands(deviceId, commands) {
+    const payloadCommands = commands.map(({ code, value }) => ({
+      code: normalizeCode(code),
+      value
+    }));
+    this.log.debug(`SEND ${deviceId}: ${payloadCommands.map(c => `${c.code}=${dval(c.value)}`).join(", ")}`);
+
+    try {
+      await this.api.sendCommand(deviceId, {
+        commands: payloadCommands
+      });
+      this.log.debug(`OK   ${deviceId}: ${payloadCommands.map(c => c.code).join(", ")}`);
+    } catch (err) {
+      this.log.debug(`ERR  ${deviceId}: ${payloadCommands.map(c => c.code).join(", ")} => ${errDetails(err)}`);
+      throw err;
+    }
+  }
+
+  /**
    * Hilfsfunktion: einen einzelnen Befehl senden (mit Debug + Retry)
    *
    * @param deviceId
@@ -701,6 +720,28 @@ class DanfossAlly extends utils.Adapter {
         }
       }
       throw err;
+    }
+  }
+
+  async sendSetpoint(deviceId, v10) {
+    try {
+      await this.sendCommands(deviceId, [
+        {
+          code: "SetpointChangeSource",
+          value: "Externally"
+        },
+        {
+          code: "temp_set",
+          value: v10
+        }
+      ]);
+      return true;
+    } catch (e) {
+      this.log.debug(
+        `Combined SetpointChangeSource+temp_set failed for ${deviceId}: ${e.message}; falling back to temp_set only`
+      );
+      await this.sendOne(deviceId, "temp_set", v10);
+      return false;
     }
   }
 
@@ -802,15 +843,7 @@ class DanfossAlly extends utils.Adapter {
           return;
         }
 
-        // SetpointChangeSource auf Externally setzen
-        try {
-          await this.sendOne(deviceId, "SetpointChangeSource", "Externally");
-          this.log.debug(`SetpointChangeSource=Externally sent for ${deviceId}`);
-        } catch (e) {
-          this.log.debug(`SetpointChangeSource pre-set failed for ${deviceId}: ${e.message} (continuing)`);
-        }
-
-        await this.sendOne(deviceId, "temp_set", v10);
+        const sourceSent = await this.sendSetpoint(deviceId, v10);
         await this.setStateAsync(`${deviceId}.status.temp_set`, {
           val: Number(val),
           ack: true
@@ -827,20 +860,24 @@ class DanfossAlly extends utils.Adapter {
           val: Number(val),
           ack: true
         });
-        await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
-          val: "Externally",
-          ack: true
-        }).catch(() => {});
-        await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
-          val: "Externally",
-          ack: true
-        }).catch(() => {});
+        if (sourceSent) {
+          await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+          await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+          this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
+        }
 
         this._noteWrite(deviceId, "temp_set", Number(val));
-        this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
 
         this._softRefreshSoon(deviceId, "temp_set");
-        this.log.info(`Set temp_set via manual_mode_fast for ${deviceId} (with SetpointChangeSource=Externally)`);
+        this.log.info(
+          `Set temp_set via manual_mode_fast for ${deviceId}${sourceSent ? " (with SetpointChangeSource=Externally)" : ""}`
+        );
         return;
       }
 
@@ -854,16 +891,7 @@ class DanfossAlly extends utils.Adapter {
           return;
         }
 
-        // Schritt 1: SetpointChangeSource auf Externally setzen (nötig für Ally TRVs)
-        try {
-          await this.sendOne(deviceId, "SetpointChangeSource", "Externally");
-          this.log.debug(`SetpointChangeSource=Externally sent for ${deviceId}`);
-        } catch (e) {
-          this.log.debug(`SetpointChangeSource pre-set failed for ${deviceId}: ${e.message} (continuing)`);
-        }
-
-        // Schritt 2: temp_set schicken
-        await this.sendOne(deviceId, "temp_set", v10);
+        const sourceSent = await this.sendSetpoint(deviceId, v10);
         await this.setStateAsync(`${deviceId}.status.temp_set`, {
           val: Number(val),
           ack: true
@@ -872,21 +900,22 @@ class DanfossAlly extends utils.Adapter {
           val: Number(val),
           ack: true
         });
-        // Status-Spiegel für SetpointChangeSource
-        await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
-          val: "Externally",
-          ack: true
-        }).catch(() => {});
-        await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
-          val: "Externally",
-          ack: true
-        }).catch(() => {});
+        if (sourceSent) {
+          await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+          await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+          this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
+        }
 
         this._noteWrite(deviceId, "temp_set", Number(val));
-        this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
 
         this._softRefreshSoon(deviceId, "temp_set");
-        this.log.info(`Set temp_set for ${deviceId} (with SetpointChangeSource=Externally)`);
+        this.log.info(`Set temp_set for ${deviceId}${sourceSent ? " (with SetpointChangeSource=Externally)" : ""}`);
         return;
       }
 
