@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.17",
+    "version": "0.2.18",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,19 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.18": {
+        "en": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available, added warnings when the Danfoss Cloud does not confirm a requested setpoint, and improved device naming/detection for relay-like devices.",
+        "de": "Sollwert-Schreiben für Ally TRVs verbessert: Wenn vorhanden, wird zusätzlich manual_mode_fast gesendet. Neue Warnungen zeigen, wenn die Danfoss Cloud einen angeforderten Sollwert nicht bestätigt. Gerätebenennung und Erkennung für Relay-ähnliche Geräte verbessert.",
+        "ru": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "pt": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "nl": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "fr": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "it": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "es": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "pl": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "uk": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "zh-cn": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming."
+      },
       "0.2.17": {
         "en": "Improved Ally TRV setpoint writes by sending SetpointChangeSource and temp_set as one combined command before falling back to temp_set only. Fixed switch subscriptions for Icon2/Boiler Relay control. Added Occupied_Setpoint alias handling and fixed jsonConfig header validation.",
         "de": "Sollwert-Schreiben für Ally TRVs verbessert: SetpointChangeSource und temp_set werden zuerst gemeinsam gesendet, mit Fallback auf temp_set allein. switch-Abos für Icon2/Boiler Relay Control behoben. Occupied_Setpoint-Alias ergänzt und jsonConfig Header-Validierung korrigiert.",
