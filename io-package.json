@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.18",
+    "version": "0.2.19",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,19 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.19": {
+        "en": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "de": "Polls schreiben Cloud-Werte nicht mehr in control-States zurück, um Rückkopplungen mit externen Systemen zu vermeiden. Schreibquellen werden im Debug-Log mitgeloggt, Geräte ohne Statuswerte werden zusätzlich per Einzelstatus abgefragt und Poll-Debug-Logs werden kompakter zusammengefasst.",
+        "ru": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "pt": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "nl": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "fr": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "it": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "es": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "pl": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "uk": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "zh-cn": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries."
+      },
       "0.2.18": {
         "en": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available, added warnings when the Danfoss Cloud does not confirm a requested setpoint, and improved device naming/detection for relay-like devices.",
         "de": "Sollwert-Schreiben für Ally TRVs verbessert: Wenn vorhanden, wird zusätzlich manual_mode_fast gesendet. Neue Warnungen zeigen, wenn die Danfoss Cloud einen angeforderten Sollwert nicht bestätigt. Gerätebenennung und Erkennung für Relay-ähnliche Geräte verbessert.",

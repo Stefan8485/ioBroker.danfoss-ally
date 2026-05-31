@@ -152,6 +152,26 @@ function dval(v) {
   return typeof v === "number" ? Number(v.toFixed(1)) : v;
 }
 
+function logVal(v) {
+  if (v === undefined || v === null) {
+    return "n/a";
+  }
+  return dval(v);
+}
+
+function statusEntriesFromRaw(raw) {
+  const status = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw.result ?? raw.status ?? raw) : raw;
+  if (Array.isArray(status)) {
+    return status
+      .filter(entry => entry && typeof entry.code === "string" && entry.value !== undefined)
+      .map(entry => [entry.code, entry.value]);
+  }
+  if (status && typeof status === "object") {
+    return Object.entries(status);
+  }
+  return [];
+}
+
 function coerceTypeByHint(code, value) {
   const hint = TYPE_HINTS.get(code);
   if (!hint) {
@@ -194,6 +214,7 @@ class DanfossAlly extends utils.Adapter {
     this._pending = new Map(); // key: `${deviceId}.${code}` -> { val, until }
     this._lastWriteAt = 0;
     this._recentWriteTs = new Map(); // key: `${deviceId}.${code}` -> ts (ms)
+    this._initialStatusLogDone = false;
   }
 
   sanitizeId(raw) {
@@ -267,6 +288,8 @@ class DanfossAlly extends utils.Adapter {
    */
   async updateDevices() {
     const pollStartedAt = Date.now();
+    const initialStatusLog = !this._initialStatusLogDone;
+    const pollChanges = new Map();
     let changed = 0,
       skipped = 0,
       held = 0;
@@ -329,13 +352,12 @@ class DanfossAlly extends utils.Adapter {
           native: {}
         });
 
-        // Statusquelle (Array aus raw.status oder Key/Value aus dev.status)
-        let pairs = [];
-        if (Array.isArray(dev?.raw?.status)) {
-          pairs = dev.raw.status.map(s => [s.code, s.value]);
-        } else {
-          const map = dev.status || {};
-          pairs = Object.entries(map);
+        // Statusquelle: bevorzugt Geräteliste, ansonsten Einzelstatus nachladen
+        let pairs = statusEntriesFromRaw(dev?.raw?.status?.length ? dev.raw.status : dev.status);
+        if (!pairs.length) {
+          const directStatus = await this.api.getDeviceStatus(dev.id);
+          pairs = statusEntriesFromRaw(directStatus);
+          this.log.debug(`STATUS ${devId}: loaded ${pairs.length} entries via direct status endpoint`);
         }
 
         for (const [codeRaw, rawValue] of pairs) {
@@ -454,8 +476,8 @@ class DanfossAlly extends utils.Adapter {
               }
             }
 
-            // Optional (aber UX-top): control immer mit aktuellem Status synchron halten
-            await this.setStateChangedAsync(cid, value, true);
+            // control ist reiner Schreibkanal. Cloud-Rueckmeldungen stehen unter status.
+            // So vermeiden wir Feedback-Loops mit externen Systemen, die control.* abonnieren.
           }
 
           // Pending-Write-Hold: Poll soll lokale Writes nicht direkt überschreiben
@@ -495,11 +517,25 @@ class DanfossAlly extends utils.Adapter {
             }
           }
 
+          const oldState = await this.getStateAsync(id);
+          const oldKnown = oldState && oldState.val !== undefined && oldState.val !== null;
           const result = await this.setStateChangedAsync(id, value, true);
           if (result) {
             // result = true → Wert wurde geändert
             changed++;
-            this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
+            if (initialStatusLog) {
+              this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
+            } else {
+              const ackOnly = oldKnown && isSameVal(code, oldState.val, value) && oldState.ack !== true;
+              const text = ackOnly
+                ? `${code}: ${logVal(value)} (ack corrected)`
+                : `${code}: ${logVal(oldState?.val)} -> ${logVal(value)}`;
+
+              if (!pollChanges.has(devId)) {
+                pollChanges.set(devId, []);
+              }
+              pollChanges.get(devId).push(text);
+            }
           } else {
             // result = false → Wert war identisch, wurde NICHT geschrieben
             skipped++;
@@ -507,7 +543,19 @@ class DanfossAlly extends utils.Adapter {
         }
       }
 
-      this.log.debug(`Updated ${devices.length} devices. Changed=${changed}, Skipped=${skipped}, Held=${held}`);
+      if (!initialStatusLog) {
+        for (const [devId, entries] of pollChanges) {
+          const maxEntries = 12;
+          const visible = entries.slice(0, maxEntries).join(", ");
+          const rest = entries.length > maxEntries ? `, ... +${entries.length - maxEntries} more` : "";
+          this.log.debug(`CHANGES ${devId}: ${visible}${rest}`);
+        }
+      }
+
+      this.log.debug(
+        `Updated ${devices.length} devices. Mode=${initialStatusLog ? "initial" : "poll"}, Changed=${changed}, Skipped=${skipped}, Held=${held}`
+      );
+      this._initialStatusLogDone = true;
     } catch (err) {
       this.log.error(`Error updating devices: ${err.message}`);
     }
@@ -541,15 +589,7 @@ class DanfossAlly extends utils.Adapter {
   async _softRefreshOne(deviceId, onlyCodes = null) {
     try {
       const raw = await this.api.getDeviceStatus(deviceId);
-      const statusArray = Array.isArray(raw?.result)
-        ? raw.result
-        : Array.isArray(raw?.status)
-          ? raw.status
-          : Array.isArray(raw)
-            ? raw
-            : raw && typeof raw === "object"
-              ? Object.entries(raw).map(([code, value]) => ({ code, value }))
-              : [];
+      const statusArray = statusEntriesFromRaw(raw).map(([code, value]) => ({ code, value }));
 
       const devPath = `${deviceId}`;
 
@@ -843,7 +883,7 @@ class DanfossAlly extends utils.Adapter {
     }
 
     // 3) reguläres Debug + Ablauf
-    this.log.debug(`WRITE ${id} val=${dval(state.val)}`);
+    this.log.debug(`WRITE ${id} val=${dval(state.val)} from=${state.from || "unknown"}`);
 
     try {
       // Nur echte States verarbeiten (Channels/Folders ignorieren)
@@ -949,7 +989,6 @@ class DanfossAlly extends utils.Adapter {
             val: "Externally",
             ack: true
           }).catch(() => {});
-          this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
         }
 
         this._noteWrite(deviceId, "temp_set", Number(val));
@@ -1006,7 +1045,6 @@ class DanfossAlly extends utils.Adapter {
             val: "Externally",
             ack: true
           }).catch(() => {});
-          this._noteWrite(deviceId, "SetpointChangeSource", "Externally");
         }
 
         this._noteWrite(deviceId, "temp_set", Number(val));
