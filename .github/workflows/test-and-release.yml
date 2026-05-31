@@ -9,6 +9,10 @@ on:
       - "v[0-9]+.[0-9]+.[0-9]+-**"
   pull_request: {}
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # ---------------------------------------------------
   # 1) QUICK CHECK + LINT (ioBroker Standard)
@@ -16,11 +20,14 @@ jobs:
   check-and-lint:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     runs-on: ubuntu-latest
+    concurrency:
+      group: check-and-lint-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
-      - uses: ioBroker/testing-action-check@v1
+      - uses: ioBroker/testing-action-check@v2.0.0
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           lint: true
 
   # ---------------------------------------------------
@@ -29,6 +36,9 @@ jobs:
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
     needs: check-and-lint
+    concurrency:
+      group: adapter-tests-${{ github.ref }}-${{ matrix.os }}-${{ matrix.node-version }}
+      cancel-in-progress: true
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -37,6 +47,8 @@ jobs:
         node-version: [22.x, 24.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
     steps:
       - uses: ioBroker/testing-action-adapter@v1
         with:
@@ -63,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: ioBroker/testing-action-deploy@v1
+      - uses: ioBroker/testing-action-deploy@v1.5.0
         with:
-          node-version: '22.x'
+          node-version: '24.x'
           github-token: ${{ secrets.GITHUB_TOKEN }}

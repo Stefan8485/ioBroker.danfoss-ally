@@ -30,3 +30,6 @@ logs/
 *.rej
 *.patch
 *.backup
+
+# === Claude ===
+.claude

@@ -7,10 +7,11 @@ const WRITE_HOLD_MS = 60 * 1000; // 1 min: solange überschreibt der Poll lokale
 const ANTI_RACE_PAUSE_MS = 5000; // 5 s: direkter kurzer Poll-Stopp nach lokalem Write
 const LAG_SUPPRESS_MS = 15000; // 15 s: unterdrücke "alte" Poll-Werte nach lokalem Write
 const TEMP_EPS = 0.05; // °C-Toleranz zum Abgleich mit Cloud
+const SETPOINT_CONFIRM_MS = 2 * 60 * 1000; // nach 2 min nochmals prüfen, ob die Cloud den Sollwert hält
 
 // Typ-/Einheits-Hints halten die Objekte stabil (kein Typflip bei wechselnden API-Rückgaben)
 const TYPE_HINTS = new Map([
-  // Zahlen (°C)
+  // Zahlen (°C) — Danfoss Ally API Faktor ×10
   ["temp_current", "number"],
   ["temp_set", "number"],
   ["upper_temp", "number"],
@@ -20,20 +21,38 @@ const TYPE_HINTS = new Map([
   ["pause_setting", "number"],
   ["holiday_setting", "number"],
   ["manual_mode_fast", "number"],
+  ["MeasuredValue", "number"], // Zigbee Faktor ×10 (Ist-Temperatur)
 
-  // Zahlen (%)
+  // Zahlen (°C) — Zigbee Thermostat Cluster Faktor ×100
+  ["OccupiedSetpoint", "number"], // ACHTUNG: /100, nicht /10!
+
+  // Zahlen (% / sonstige)
   ["humidity_value", "number"],
   ["battery_percentage", "number"],
+  ["pi_heating_demand", "number"], // 0–100 % Heizleistung
+  ["ext_measured_rs", "number"], // Bodensensor-Widerstand mΩ, -8000=kein Sensor
 
   // Bool
   ["child_lock", "boolean"],
+  ["floor_sensor", "boolean"],
+  ["heat_available", "boolean"],
+  ["load_balance_enable", "boolean"],
+  ["mounting_mode_active", "boolean"],
+  ["radiator_covered", "boolean"],
+  ["switch", "boolean"],
+  ["switch_state", "boolean"],
+  ["window_toggle", "boolean"],
 
   // Strings (Enums/Text)
   ["mode", "string"],
   ["SetpointChangeSource", "string"],
   ["work_state", "string"],
   ["output_status", "string"],
-  ["fault", "string"]
+  ["fault", "string"],
+  ["system_status_water", "string"],
+  ["temp_mode", "string"],
+  ["window_state", "string"],
+  ["window_state_info", "string"]
 ]);
 
 const UNIT_HINTS = new Map([
@@ -47,7 +66,10 @@ const UNIT_HINTS = new Map([
   ["holiday_setting", "°C"],
   ["humidity_value", "%"],
   ["battery_percentage", "%"],
-  ["manual_mode_fast", "°C"]
+  ["manual_mode_fast", "°C"],
+  ["MeasuredValue", "°C"],
+  ["OccupiedSetpoint", "°C"],
+  ["pi_heating_demand", "%"]
 ]);
 
 // Beschreibbare States
@@ -60,16 +82,32 @@ const WRITEABLE_CODES = new Set([
   "holiday_setting",
   "mode",
   "child_lock",
-  "SetpointChangeSource"
+  "SetpointChangeSource",
+  "switch" // Icon2: Zone Ein/Aus
 ]);
 
 /** ------- Alias-/Normalisierung ------- */
 const CODE_ALIASES = new Map([
+  ["occupied_setpoint", "OccupiedSetpoint"],
+  ["occupiedsetpoint", "OccupiedSetpoint"],
   ["pause_settings", "pause_setting"],
   ["pause", "pause_setting"], // falls jemand nur "pause" schreibt
   ["setpoint_change_source", "SetpointChangeSource"],
   ["setpointchangesource", "SetpointChangeSource"],
   ["setpoint_change", "SetpointChangeSource"]
+]);
+
+const TEMP_LIKE_CODES = new Set([
+  "temp_current",
+  "temp_set",
+  "upper_temp",
+  "lower_temp",
+  "at_home_setting",
+  "leaving_home_setting",
+  "pause_setting",
+  "holiday_setting",
+  "manual_mode_fast",
+  "MeasuredValue"
 ]);
 
 const MODE_ALIASES = new Map([
@@ -114,6 +152,26 @@ function dval(v) {
   return typeof v === "number" ? Number(v.toFixed(1)) : v;
 }
 
+function logVal(v) {
+  if (v === undefined || v === null) {
+    return "n/a";
+  }
+  return dval(v);
+}
+
+function statusEntriesFromRaw(raw) {
+  const status = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw.result ?? raw.status ?? raw) : raw;
+  if (Array.isArray(status)) {
+    return status
+      .filter(entry => entry && typeof entry.code === "string" && entry.value !== undefined)
+      .map(entry => [entry.code, entry.value]);
+  }
+  if (status && typeof status === "object") {
+    return Object.entries(status);
+  }
+  return [];
+}
+
 function coerceTypeByHint(code, value) {
   const hint = TYPE_HINTS.get(code);
   if (!hint) {
@@ -134,18 +192,7 @@ function coerceTypeByHint(code, value) {
 // Vergleich nur-auf-Änderung (mit EPS für Temp)
 function isSameVal(code, a, b) {
   if (typeof a === "number" && typeof b === "number") {
-    const tempish = [
-      "temp_current",
-      "temp_set",
-      "upper_temp",
-      "lower_temp",
-      "at_home_setting",
-      "leaving_home_setting",
-      "pause_setting",
-      "holiday_setting",
-      "manual_mode_fast"
-    ];
-    return tempish.includes(code) ? Math.abs(a - b) <= TEMP_EPS : a === b;
+    return TEMP_LIKE_CODES.has(code) ? Math.abs(a - b) <= TEMP_EPS : a === b;
   }
   return a === b;
 }
@@ -161,11 +208,13 @@ class DanfossAlly extends utils.Adapter {
     this.on("stateChange", this.onStateChange.bind(this));
     this.on("unload", this.onUnload.bind(this));
     this.timeoutHandles = new Map();
+    this.confirmHandles = new Map();
 
     // Write-Coordination
     this._pending = new Map(); // key: `${deviceId}.${code}` -> { val, until }
     this._lastWriteAt = 0;
     this._recentWriteTs = new Map(); // key: `${deviceId}.${code}` -> ts (ms)
+    this._initialStatusLogDone = false;
   }
 
   sanitizeId(raw) {
@@ -217,16 +266,7 @@ class DanfossAlly extends utils.Adapter {
 
       // Auf Schreib-States hören (inkl. Aliasse)
       [
-        "*.control.temp_set",
-        "*.control.manual_mode_fast",
-        "*.control.mode",
-        "*.control.child_lock",
-        "*.control.at_home_setting",
-        "*.control.leaving_home_setting",
-        "*.control.pause_setting",
-        "*.control.holiday_setting",
-        "*.control.SetpointChangeSource",
-        // Aliasse
+        ...Array.from(WRITEABLE_CODES, code => `*.control.${code}`),
         "*.control.pause_settings",
         "*.control.setpoint_change_source",
         "*.control.setpointchangesource",
@@ -248,6 +288,8 @@ class DanfossAlly extends utils.Adapter {
    */
   async updateDevices() {
     const pollStartedAt = Date.now();
+    const initialStatusLog = !this._initialStatusLogDone;
+    const pollChanges = new Map();
     let changed = 0,
       skipped = 0,
       held = 0;
@@ -273,13 +315,28 @@ class DanfossAlly extends utils.Adapter {
         const devPath = `${devId}`;
 
         // Channel/Ordner für Gerät
-        await this.setObjectNotExistsAsync(devPath, {
-          type: "device",
-          common: {
-            name: dev.name || "Device"
-          },
-          native: dev.raw || {}
-        });
+        const deviceObj = await this.getObjectAsync(devPath);
+        if (!deviceObj) {
+          await this.setObjectAsync(devPath, {
+            type: "device",
+            common: {
+              name: dev.name || "Device"
+            },
+            native: dev.raw || {}
+          });
+        } else if ((deviceObj.common?.name || "") !== (dev.name || "Device")) {
+          await this.extendObjectAsync(devPath, {
+            common: {
+              ...(deviceObj.common || {}),
+              name: dev.name || "Device"
+            },
+            native: dev.raw || {}
+          });
+        }
+
+        this.log.debug(
+          `DEVICE ${devId}: name="${dev.name || "Device"}" type="${dev.type || "unknown"}" online=${dev.online}`
+        );
 
         // Channel "status" unter dem Gerät anlegen
         await this.setObjectNotExistsAsync(`${devPath}.status`, {
@@ -295,13 +352,12 @@ class DanfossAlly extends utils.Adapter {
           native: {}
         });
 
-        // Statusquelle (Array aus raw.status oder Key/Value aus dev.status)
-        let pairs = [];
-        if (Array.isArray(dev?.raw?.status)) {
-          pairs = dev.raw.status.map(s => [s.code, s.value]);
-        } else {
-          const map = dev.status || {};
-          pairs = Object.entries(map);
+        // Statusquelle: bevorzugt Geräteliste, ansonsten Einzelstatus nachladen
+        let pairs = statusEntriesFromRaw(dev?.raw?.status?.length ? dev.raw.status : dev.status);
+        if (!pairs.length) {
+          const directStatus = await this.api.getDeviceStatus(dev.id);
+          pairs = statusEntriesFromRaw(directStatus);
+          this.log.debug(`STATUS ${devId}: loaded ${pairs.length} entries via direct status endpoint`);
         }
 
         for (const [codeRaw, rawValue] of pairs) {
@@ -314,19 +370,13 @@ class DanfossAlly extends utils.Adapter {
 
           // Skalierung in reale Einheiten
           let value = rawValue;
-          const tempLike = [
-            "temp_current",
-            "temp_set",
-            "upper_temp",
-            "lower_temp",
-            "at_home_setting",
-            "leaving_home_setting",
-            "pause_setting",
-            "holiday_setting",
-            "manual_mode_fast"
-          ];
-          if (tempLike.includes(code) && typeof value === "number") {
+          // Skalierung: Ally API Faktor ×10 → °C
+          if (TEMP_LIKE_CODES.has(code) && typeof value === "number") {
             value = value / 10;
+          }
+          // Zigbee Thermostat Cluster OccupiedSetpoint: Faktor ×100
+          if (code === "OccupiedSetpoint" && typeof value === "number") {
+            value = value / 100;
           }
           if (code === "humidity_value" && typeof value === "number") {
             value = value / 10;
@@ -426,28 +476,31 @@ class DanfossAlly extends utils.Adapter {
               }
             }
 
-            // Optional (aber UX-top): control immer mit aktuellem Status synchron halten
-            await this.setStateChangedAsync(cid, value, true);
+            // control ist reiner Schreibkanal. Cloud-Rueckmeldungen stehen unter status.
+            // So vermeiden wir Feedback-Loops mit externen Systemen, die control.* abonnieren.
           }
 
           // Pending-Write-Hold: Poll soll lokale Writes nicht direkt überschreiben
           const key = `${devId}.${code}`;
           const pending = this._pending.get(key);
-          if (pending && pollStartedAt < pending.until) {
-            const same =
-              (typeof value === "number" && Math.abs(value - Number(pending.val)) <= TEMP_EPS) || value === pending.val;
-
+          if (pending) {
+            const same = isSameVal(code, value, pending.val);
             if (same) {
               // Cloud hat den lokalen Wert erreicht -> Hold auflösen
               this.log.debug(`MATCH ${key}: cloud≈local -> drop hold`);
               this._pending.delete(key);
-            } else {
+            } else if (pollStartedAt < pending.until) {
               // Lokalen Wert weiterhin schützen
               held++;
               this.log.debug(
                 `HOLD ${key}: keep local=${dval(pending.val)} vs cloud=${dval(value)} (until ${new Date(pending.until).toISOString()})`
               );
               continue; // cloud nicht anwenden
+            } else {
+              this.log.warn(
+                `Cloud did not confirm ${key}: requested=${dval(pending.val)}, cloud=${dval(value)}. Applying cloud value.`
+              );
+              this._pending.delete(key);
             }
           }
 
@@ -464,11 +517,25 @@ class DanfossAlly extends utils.Adapter {
             }
           }
 
+          const oldState = await this.getStateAsync(id);
+          const oldKnown = oldState && oldState.val !== undefined && oldState.val !== null;
           const result = await this.setStateChangedAsync(id, value, true);
           if (result) {
             // result = true → Wert wurde geändert
             changed++;
-            this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
+            if (initialStatusLog) {
+              this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
+            } else {
+              const ackOnly = oldKnown && isSameVal(code, oldState.val, value) && oldState.ack !== true;
+              const text = ackOnly
+                ? `${code}: ${logVal(value)} (ack corrected)`
+                : `${code}: ${logVal(oldState?.val)} -> ${logVal(value)}`;
+
+              if (!pollChanges.has(devId)) {
+                pollChanges.set(devId, []);
+              }
+              pollChanges.get(devId).push(text);
+            }
           } else {
             // result = false → Wert war identisch, wurde NICHT geschrieben
             skipped++;
@@ -476,7 +543,19 @@ class DanfossAlly extends utils.Adapter {
         }
       }
 
-      this.log.debug(`Updated ${devices.length} devices. Changed=${changed}, Skipped=${skipped}, Held=${held}`);
+      if (!initialStatusLog) {
+        for (const [devId, entries] of pollChanges) {
+          const maxEntries = 12;
+          const visible = entries.slice(0, maxEntries).join(", ");
+          const rest = entries.length > maxEntries ? `, ... +${entries.length - maxEntries} more` : "";
+          this.log.debug(`CHANGES ${devId}: ${visible}${rest}`);
+        }
+      }
+
+      this.log.debug(
+        `Updated ${devices.length} devices. Mode=${initialStatusLog ? "initial" : "poll"}, Changed=${changed}, Skipped=${skipped}, Held=${held}`
+      );
+      this._initialStatusLogDone = true;
     } catch (err) {
       this.log.error(`Error updating devices: ${err.message}`);
     }
@@ -510,13 +589,7 @@ class DanfossAlly extends utils.Adapter {
   async _softRefreshOne(deviceId, onlyCodes = null) {
     try {
       const raw = await this.api.getDeviceStatus(deviceId);
-      const statusArray = Array.isArray(raw?.result)
-        ? raw.result
-        : Array.isArray(raw?.status)
-          ? raw.status
-          : Array.isArray(raw)
-            ? raw
-            : [];
+      const statusArray = statusEntriesFromRaw(raw).map(([code, value]) => ({ code, value }));
 
       const devPath = `${deviceId}`;
 
@@ -544,19 +617,11 @@ class DanfossAlly extends utils.Adapter {
         }
 
         let value = entry.value;
-        const tempLike = [
-          "temp_current",
-          "temp_set",
-          "upper_temp",
-          "lower_temp",
-          "at_home_setting",
-          "leaving_home_setting",
-          "pause_setting",
-          "holiday_setting",
-          "manual_mode_fast"
-        ];
-        if (tempLike.includes(code) && typeof value === "number") {
+        if (TEMP_LIKE_CODES.has(code) && typeof value === "number") {
           value = value / 10;
+        }
+        if (code === "OccupiedSetpoint" && typeof value === "number") {
+          value = value / 100;
         }
         if (code === "humidity_value" && typeof value === "number") {
           value = value / 10;
@@ -569,8 +634,7 @@ class DanfossAlly extends utils.Adapter {
         // HOLD-Logik
         const pending = this._pending.get(key);
         if (pending && Date.now() < pending.until) {
-          const same =
-            (typeof value === "number" && Math.abs(value - Number(pending.val)) <= TEMP_EPS) || value === pending.val;
+          const same = isSameVal(code, value, pending.val);
           if (same) {
             this.log.debug(`MATCH ${key}: cloud≈local → drop hold`);
             this._pending.delete(key);
@@ -607,8 +671,9 @@ class DanfossAlly extends utils.Adapter {
     }
   }
 
-  _softRefreshSoon(deviceId, code) {
-    const codes = new Set([code, "temp_current"]);
+  _softRefreshSoon(deviceId, codeOrCodes) {
+    const codes = new Set(Array.isArray(codeOrCodes) ? codeOrCodes : [codeOrCodes]);
+    codes.add("temp_current");
 
     if (this.timeoutHandles.has(deviceId)) {
       this.clearTimeout(this.timeoutHandles.get(deviceId));
@@ -620,6 +685,80 @@ class DanfossAlly extends utils.Adapter {
     }, 1500);
 
     this.timeoutHandles.set(deviceId, handle);
+  }
+
+  async _hasStateObject(deviceId, code) {
+    const statusObj = await this.getObjectAsync(`${deviceId}.status.${code}`);
+    if (statusObj) {
+      return true;
+    }
+    const controlObj = await this.getObjectAsync(`${deviceId}.control.${code}`);
+    return !!controlObj;
+  }
+
+  _confirmSetpointSoon(deviceId, requestedVal) {
+    const key = `${deviceId}.setpoint`;
+    if (this.confirmHandles.has(key)) {
+      this.clearTimeout(this.confirmHandles.get(key));
+    }
+
+    const handle = this.setTimeout(async () => {
+      try {
+        await this._softRefreshOne(
+          deviceId,
+          new Set(["temp_set", "manual_mode_fast", "SetpointChangeSource", "OccupiedSetpoint"])
+        );
+
+        const tempSet = await this.getStateAsync(`${deviceId}.status.temp_set`);
+        const manualFast = await this.getStateAsync(`${deviceId}.status.manual_mode_fast`);
+        const source = await this.getStateAsync(`${deviceId}.status.SetpointChangeSource`);
+        const tempOk = tempSet && tempSet.val !== undefined && isSameVal("temp_set", Number(tempSet.val), requestedVal);
+        const fastOk =
+          manualFast &&
+          manualFast.val !== undefined &&
+          isSameVal("manual_mode_fast", Number(manualFast.val), requestedVal);
+
+        if (tempOk || fastOk) {
+          this.log.debug(
+            `CONFIRM ${deviceId}: setpoint accepted by cloud (temp_set=${dval(tempSet?.val)}, manual_mode_fast=${dval(manualFast?.val)}, source=${source?.val ?? "n/a"})`
+          );
+        } else {
+          this.log.warn(
+            `Cloud still reports a different setpoint for ${deviceId}: requested=${dval(requestedVal)}, temp_set=${dval(tempSet?.val)}, manual_mode_fast=${dval(manualFast?.val)}, source=${source?.val ?? "n/a"}`
+          );
+        }
+      } catch (e) {
+        this.log.debug(`Setpoint confirm failed for ${deviceId}: ${e.message}`);
+      } finally {
+        this.confirmHandles.delete(key);
+      }
+    }, SETPOINT_CONFIRM_MS);
+
+    this.confirmHandles.set(key, handle);
+  }
+
+  /**
+   * Hilfsfunktion: mehrere Befehle in einem Cloud-Request senden.
+   *
+   * @param deviceId
+   * @param commands
+   */
+  async sendCommands(deviceId, commands) {
+    const payloadCommands = commands.map(({ code, value }) => ({
+      code: normalizeCode(code),
+      value
+    }));
+    this.log.debug(`SEND ${deviceId}: ${payloadCommands.map(c => `${c.code}=${dval(c.value)}`).join(", ")}`);
+
+    try {
+      await this.api.sendCommand(deviceId, {
+        commands: payloadCommands
+      });
+      this.log.debug(`OK   ${deviceId}: ${payloadCommands.map(c => c.code).join(", ")}`);
+    } catch (err) {
+      this.log.debug(`ERR  ${deviceId}: ${payloadCommands.map(c => c.code).join(", ")} => ${errDetails(err)}`);
+      throw err;
+    }
   }
 
   /**
@@ -672,6 +811,58 @@ class DanfossAlly extends utils.Adapter {
     }
   }
 
+  async sendSetpoint(deviceId, v10, options = {}) {
+    const result = {
+      sourceSent: false,
+      tempSent: false,
+      manualFastSent: false
+    };
+    let lastError = null;
+
+    try {
+      await this.sendCommands(deviceId, [
+        {
+          code: "SetpointChangeSource",
+          value: "Externally"
+        },
+        {
+          code: "temp_set",
+          value: v10
+        }
+      ]);
+      result.sourceSent = true;
+      result.tempSent = true;
+    } catch (e) {
+      lastError = e;
+      this.log.debug(
+        `Combined SetpointChangeSource+temp_set failed for ${deviceId}: ${e.message}; falling back to temp_set only`
+      );
+      try {
+        await this.sendOne(deviceId, "temp_set", v10);
+        result.tempSent = true;
+      } catch (e2) {
+        lastError = e2;
+        this.log.debug(`Fallback temp_set failed for ${deviceId}: ${e2.message}`);
+      }
+    }
+
+    if (options.includeManualModeFast) {
+      try {
+        await this.sendOne(deviceId, "manual_mode_fast", v10);
+        result.manualFastSent = true;
+      } catch (e) {
+        lastError = e;
+        this.log.debug(`Additional manual_mode_fast setpoint command failed for ${deviceId}: ${e.message}`);
+      }
+    }
+
+    if (!result.tempSent && !result.manualFastSent) {
+      throw lastError || new Error("No setpoint command could be sent");
+    }
+
+    return result;
+  }
+
   /**
    * Writes aus ioBroker entgegennehmen und an die Cloud senden
    * – ohne automatische Sequenzen (volle Kontrolle pro Code)
@@ -692,7 +883,7 @@ class DanfossAlly extends utils.Adapter {
     }
 
     // 3) reguläres Debug + Ablauf
-    this.log.debug(`WRITE ${id} val=${dval(state.val)}`);
+    this.log.debug(`WRITE ${id} val=${dval(state.val)} from=${state.from || "unknown"}`);
 
     try {
       // Nur echte States verarbeiten (Channels/Folders ignorieren)
@@ -738,8 +929,9 @@ class DanfossAlly extends utils.Adapter {
           return null;
         }
 
-        const lower = await this.getStateAsync(`${deviceId}.lower_temp`);
-        const upper = await this.getStateAsync(`${deviceId}.upper_temp`);
+        // FIX v0.2.16: Korrekter Pfad mit .status.-Prefix
+        const lower = await this.getStateAsync(`${deviceId}.status.lower_temp`);
+        const upper = await this.getStateAsync(`${deviceId}.status.upper_temp`);
 
         const before = target;
         if (lower && typeof lower.val === "number") {
@@ -761,6 +953,7 @@ class DanfossAlly extends utils.Adapter {
       // ==== Schreiblogik (einzeln, ohne Auto-Sequenzen) ====
 
       // manual_mode_fast -> temp_set (Shortcut, kein Moduswechsel)
+      // v0.2.16: SetpointChangeSource="Externally" wird immer mitgeschickt
       if (code === "manual_mode_fast") {
         const v10 = await prepareTempValue10(val);
         if (v10 == null) {
@@ -768,7 +961,9 @@ class DanfossAlly extends utils.Adapter {
           return;
         }
 
-        await this.sendOne(deviceId, "temp_set", v10);
+        const setpointResult = await this.sendSetpoint(deviceId, v10, {
+          includeManualModeFast: true
+        });
         await this.setStateAsync(`${deviceId}.status.temp_set`, {
           val: Number(val),
           ack: true
@@ -785,14 +980,33 @@ class DanfossAlly extends utils.Adapter {
           val: Number(val),
           ack: true
         });
-        this._noteWrite(deviceId, "temp_set", Number(val));
+        if (setpointResult.sourceSent) {
+          await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+          await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+        }
 
-        this._softRefreshSoon(deviceId, "temp_set");
-        this.log.info(`Set temp_set via manual_mode_fast for ${deviceId}`);
+        this._noteWrite(deviceId, "temp_set", Number(val));
+        if (setpointResult.manualFastSent) {
+          this._noteWrite(deviceId, "manual_mode_fast", Number(val));
+        }
+
+        this._softRefreshSoon(deviceId, ["temp_set", "manual_mode_fast", "SetpointChangeSource"]);
+        this._confirmSetpointSoon(deviceId, Number(val));
+        this.log.info(
+          `Set temp_set via manual_mode_fast for ${deviceId}${setpointResult.sourceSent ? " (with SetpointChangeSource=Externally)" : ""}${setpointResult.manualFastSent ? " + manual_mode_fast" : ""}`
+        );
         return;
       }
 
       // temp_set (kein Moduswechsel)
+      // v0.2.16: SetpointChangeSource="Externally" wird immer mitgeschickt,
+      // da Ally TRV-Thermostate temp_set ohne dieses Flag ignorieren können.
       if (code === "temp_set") {
         const v10 = await prepareTempValue10(val);
         if (v10 == null) {
@@ -800,7 +1014,10 @@ class DanfossAlly extends utils.Adapter {
           return;
         }
 
-        await this.sendOne(deviceId, "temp_set", v10);
+        const includeManualModeFast = await this._hasStateObject(deviceId, "manual_mode_fast");
+        const setpointResult = await this.sendSetpoint(deviceId, v10, {
+          includeManualModeFast
+        });
         await this.setStateAsync(`${deviceId}.status.temp_set`, {
           val: Number(val),
           ack: true
@@ -809,10 +1026,37 @@ class DanfossAlly extends utils.Adapter {
           val: Number(val),
           ack: true
         });
-        this._noteWrite(deviceId, "temp_set", Number(val));
+        if (setpointResult.manualFastSent) {
+          await this.setStateAsync(`${deviceId}.status.manual_mode_fast`, {
+            val: Number(val),
+            ack: true
+          }).catch(() => {});
+          await this.setStateAsync(`${deviceId}.control.manual_mode_fast`, {
+            val: Number(val),
+            ack: true
+          }).catch(() => {});
+        }
+        if (setpointResult.sourceSent) {
+          await this.setStateAsync(`${deviceId}.status.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+          await this.setStateAsync(`${deviceId}.control.SetpointChangeSource`, {
+            val: "Externally",
+            ack: true
+          }).catch(() => {});
+        }
 
-        this._softRefreshSoon(deviceId, "temp_set");
-        this.log.info(`Set temp_set for ${deviceId}`);
+        this._noteWrite(deviceId, "temp_set", Number(val));
+        if (setpointResult.manualFastSent) {
+          this._noteWrite(deviceId, "manual_mode_fast", Number(val));
+        }
+
+        this._softRefreshSoon(deviceId, ["temp_set", "manual_mode_fast", "SetpointChangeSource"]);
+        this._confirmSetpointSoon(deviceId, Number(val));
+        this.log.info(
+          `Set temp_set for ${deviceId}${setpointResult.sourceSent ? " (with SetpointChangeSource=Externally)" : ""}${setpointResult.manualFastSent ? " + manual_mode_fast" : ""}`
+        );
         return;
       }
 
@@ -860,6 +1104,29 @@ class DanfossAlly extends utils.Adapter {
 
         this._softRefreshSoon(deviceId, "child_lock");
         this.log.info(`Set child_lock=${!!boolVal} for ${deviceId}`);
+        return;
+      }
+
+      // switch (Icon2 Zone Ein/Aus)
+      if (code === "switch") {
+        const boolVal = val === true || val === "true" || val === 1;
+        try {
+          await this.sendOne(deviceId, "switch", boolVal);
+        } catch (e) {
+          this.log.warn(`switch write failed for ${deviceId}: ${e.message}`);
+          return;
+        }
+        await this.setStateAsync(`${deviceId}.status.switch`, {
+          val: boolVal,
+          ack: true
+        });
+        await this.setStateAsync(`${deviceId}.control.switch`, {
+          val: boolVal,
+          ack: true
+        });
+        this._noteWrite(deviceId, "switch", boolVal);
+        this._softRefreshSoon(deviceId, "switch");
+        this.log.info(`Set switch=${boolVal} for ${deviceId}`);
         return;
       }
 
@@ -957,6 +1224,51 @@ class DanfossAlly extends utils.Adapter {
       return "state";
     }
 
+    // Heizleistung
+    if (code === "pi_heating_demand") {
+      return "value.percentage";
+    }
+
+    // Bodensensor / Wärme / Betriebszustand
+    if (
+      ["heat_available", "floor_sensor", "mounting_mode_active", "radiator_covered", "load_balance_enable"].includes(
+        code
+      )
+    ) {
+      return "indicator";
+    }
+
+    // Fenstererkennung
+    if (code === "window_state" || code === "window_state_info") {
+      return "sensor.window";
+    }
+    if (code === "window_toggle") {
+      return "button";
+    }
+
+    // Switch (Icon2 Zone)
+    if (code === "switch") {
+      return "switch";
+    }
+    if (code === "switch_state") {
+      return "indicator";
+    }
+
+    // Messwerte Zigbee
+    if (code === "MeasuredValue" || code === "OccupiedSetpoint") {
+      return "value.temperature";
+    }
+
+    // Bodensensor Widerstand
+    if (code === "ext_measured_rs") {
+      return "value";
+    }
+
+    // Systemstatus
+    if (code === "system_status_water" || code === "temp_mode") {
+      return "state";
+    }
+
     // Fallback
     return "state";
   }
@@ -972,8 +1284,11 @@ class DanfossAlly extends utils.Adapter {
       holiday_setting: "°C",
       lower_temp: "°C",
       upper_temp: "°C",
+      MeasuredValue: "°C",
+      OccupiedSetpoint: "°C",
       humidity_value: "%",
-      battery_percentage: "%"
+      battery_percentage: "%",
+      pi_heating_demand: "%"
     };
     return units[code] || "";
   }
@@ -991,6 +1306,14 @@ class DanfossAlly extends utils.Adapter {
         }
         this.timeoutHandles.clear();
         this.log.debug("All pending soft-refresh timers cleared.");
+      }
+
+      if (this.confirmHandles && this.confirmHandles.size > 0) {
+        for (const handle of this.confirmHandles.values()) {
+          this.clearTimeout(handle);
+        }
+        this.confirmHandles.clear();
+        this.log.debug("All pending setpoint-confirm timers cleared.");
       }
 
       this.log.info("Adapter stopped cleanly.");

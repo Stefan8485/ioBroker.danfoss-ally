@@ -4,11 +4,15 @@
   "items": {
     "_title": {
       "type": "header",
-      "text": "Danfoss Ally Cloud"
+      "text": "Danfoss Ally Cloud",
+      "size": 5
     },
     "_divider": {
       "type": "divider",
-      "style": { "marginTop": 10, "marginBottom": 10 }
+      "style": {
+        "marginTop": 10,
+        "marginBottom": 10
+      }
     },
     "apiKey": {
       "type": "text",

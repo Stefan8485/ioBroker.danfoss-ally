@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.15",
+    "version": "0.2.19",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,58 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.19": {
+        "en": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "de": "Polls schreiben Cloud-Werte nicht mehr in control-States zurück, um Rückkopplungen mit externen Systemen zu vermeiden. Schreibquellen werden im Debug-Log mitgeloggt, Geräte ohne Statuswerte werden zusätzlich per Einzelstatus abgefragt und Poll-Debug-Logs werden kompakter zusammengefasst.",
+        "ru": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "pt": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "nl": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "fr": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "it": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "es": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "pl": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "uk": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
+        "zh-cn": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries."
+      },
+      "0.2.18": {
+        "en": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available, added warnings when the Danfoss Cloud does not confirm a requested setpoint, and improved device naming/detection for relay-like devices.",
+        "de": "Sollwert-Schreiben für Ally TRVs verbessert: Wenn vorhanden, wird zusätzlich manual_mode_fast gesendet. Neue Warnungen zeigen, wenn die Danfoss Cloud einen angeforderten Sollwert nicht bestätigt. Gerätebenennung und Erkennung für Relay-ähnliche Geräte verbessert.",
+        "ru": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "pt": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "nl": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "fr": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "it": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "es": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "pl": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "uk": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming.",
+        "zh-cn": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available. Added warnings when the Danfoss Cloud does not confirm a requested setpoint and improved relay-like device naming."
+      },
+      "0.2.17": {
+        "en": "Improved Ally TRV setpoint writes by sending SetpointChangeSource and temp_set as one combined command before falling back to temp_set only. Fixed switch subscriptions for Icon2/Boiler Relay control. Added Occupied_Setpoint alias handling and fixed jsonConfig header validation.",
+        "de": "Sollwert-Schreiben für Ally TRVs verbessert: SetpointChangeSource und temp_set werden zuerst gemeinsam gesendet, mit Fallback auf temp_set allein. switch-Abos für Icon2/Boiler Relay Control behoben. Occupied_Setpoint-Alias ergänzt und jsonConfig Header-Validierung korrigiert.",
+        "ru": "Улучшена запись уставки для Ally TRV: SetpointChangeSource и temp_set сначала отправляются одной командой, затем используется fallback только на temp_set. Исправлены подписки switch для Icon2/Boiler Relay. Добавлен алиас Occupied_Setpoint и исправлена проверка заголовка jsonConfig.",
+        "pt": "Melhorada a escrita de setpoint para Ally TRVs: SetpointChangeSource e temp_set são enviados primeiro em um comando combinado, com fallback para apenas temp_set. Corrigidas assinaturas switch para Icon2/Boiler Relay. Adicionado alias Occupied_Setpoint e corrigida validação do cabeçalho jsonConfig.",
+        "nl": "Schrijven van setpoints voor Ally TRV's verbeterd: SetpointChangeSource en temp_set worden eerst gecombineerd verzonden, met fallback naar alleen temp_set. switch-abonnementen voor Icon2/Boiler Relay opgelost. Occupied_Setpoint-alias toegevoegd en jsonConfig header-validatie gecorrigeerd.",
+        "fr": "Amélioration de l'écriture du point de consigne pour les Ally TRV : SetpointChangeSource et temp_set sont d'abord envoyés ensemble, avec repli sur temp_set seul. Correction des abonnements switch pour Icon2/Boiler Relay. Alias Occupied_Setpoint ajouté et validation de l'en-tête jsonConfig corrigée.",
+        "it": "Migliorata la scrittura del setpoint per Ally TRV: SetpointChangeSource e temp_set vengono inviati prima insieme, con fallback al solo temp_set. Corrette le sottoscrizioni switch per Icon2/Boiler Relay. Aggiunto alias Occupied_Setpoint e corretta la validazione dell'header jsonConfig.",
+        "es": "Mejorada la escritura de consigna para Ally TRV: SetpointChangeSource y temp_set se envían primero juntos, con fallback a solo temp_set. Corregidas las suscripciones switch para Icon2/Boiler Relay. Añadido alias Occupied_Setpoint y corregida la validación del encabezado jsonConfig.",
+        "pl": "Ulepszono zapis nastawy dla Ally TRV: SetpointChangeSource i temp_set są najpierw wysyłane razem, z fallbackiem do samego temp_set. Naprawiono subskrypcje switch dla Icon2/Boiler Relay. Dodano alias Occupied_Setpoint i poprawiono walidację nagłówka jsonConfig.",
+        "uk": "Покращено запис заданої температури для Ally TRV: SetpointChangeSource і temp_set спочатку надсилаються разом, із fallback на лише temp_set. Виправлено підписки switch для Icon2/Boiler Relay. Додано alias Occupied_Setpoint і виправлено валідацію заголовка jsonConfig.",
+        "zh-cn": "改进 Ally TRV 设定温度写入：先将 SetpointChangeSource 和 temp_set 作为组合命令发送，失败时回退为仅发送 temp_set。修复 Icon2/Boiler Relay 的 switch 订阅。添加 Occupied_Setpoint 别名并修复 jsonConfig 标题验证。"
+      },
+      "0.2.16": {
+        "en": "Fixed temp_set for Ally TRVs (SetpointChangeSource=Externally auto-sent). Fixed lower/upper_temp clamp path bug. Fixed OccupiedSetpoint scaling (÷100). Added type hints for 16 new data points (MeasuredValue, pi_heating_demand, window_state, etc.). Icon2 switch is now writable. Fixed jsonConfig admin validation warning.",
+        "de": "Fehler bei temp_set für Ally TRVs behoben (SetpointChangeSource=Externally wird automatisch mitgesendet). Falschen Pfad für lower/upper_temp Clamp behoben. Skalierung von OccupiedSetpoint korrigiert (÷100). Typ-Definitionen für 16 neue Datenpunkte ergänzt (MeasuredValue, pi_heating_demand, window_state usw.). Icon2 switch jetzt schreibbar. jsonConfig Admin-Validierungswarnung behoben.",
+        "ru": "Исправлена запись temp_set для Ally TRV (SetpointChangeSource=Externally отправляется автоматически). Исправлен путь для clamp lower/upper_temp. Исправлено масштабирование OccupiedSetpoint (÷100). Добавлены типы для 16 новых точек данных. switch для Icon2 теперь доступен для записи.",
+        "pt": "Corrigido temp_set para TRVs Ally (SetpointChangeSource=Externally enviado automaticamente). Corrigido caminho de clamp lower/upper_temp. Escalamento OccupiedSetpoint corrigido (÷100). Adicionados tipos para 16 novos pontos de dados. switch do Icon2 agora é gravável.",
+        "nl": "temp_set voor Ally TRVs gecorrigeerd (SetpointChangeSource=Externally automatisch verzonden). Pad voor lower/upper_temp clamp gecorrigeerd. OccupiedSetpoint schaling gecorrigeerd (÷100). Typen voor 16 nieuwe datapunten toegevoegd. Icon2 switch nu schrijfbaar.",
+        "fr": "Correction de temp_set pour les TRV Ally (SetpointChangeSource=Externally envoyé automatiquement). Correction du chemin de clamp lower/upper_temp. Mise à l'échelle OccupiedSetpoint corrigée (÷100). Types ajoutés pour 16 nouveaux points de données. Le switch Icon2 est maintenant accessible en écriture.",
+        "it": "Corretto temp_set per Ally TRV (SetpointChangeSource=Externally inviato automaticamente). Corretto il percorso clamp lower/upper_temp. Scalatura OccupiedSetpoint corretta (÷100). Aggiunti tipi per 16 nuovi punti dati. switch Icon2 ora scrivibile.",
+        "es": "Corregido temp_set para Ally TRVs (SetpointChangeSource=Externally enviado automáticamente). Corregida ruta de clamp lower/upper_temp. Escalado OccupiedSetpoint corregido (÷100). Añadidos tipos para 16 nuevos puntos de datos. switch Icon2 ahora escribible.",
+        "pl": "Naprawiono temp_set dla Ally TRV (SetpointChangeSource=Externally wysyłane automatycznie). Naprawiono ścieżkę clamp lower/upper_temp. Naprawiono skalowanie OccupiedSetpoint (÷100). Dodano typy dla 16 nowych punktów danych. Przełącznik Icon2 teraz zapisywalny.",
+        "uk": "Виправлено temp_set для Ally TRV (SetpointChangeSource=Externally надсилається автоматично). Виправлено шлях clamp lower/upper_temp. Виправлено масштабування OccupiedSetpoint (÷100). Додано типи для 16 нових точок даних. switch Icon2 тепер записуваний.",
+        "zh-cn": "修复 Ally TRV 的 temp_set（自动发送 SetpointChangeSource=Externally）。修复 lower/upper_temp clamp 路径错误。修复 OccupiedSetpoint 缩放（÷100）。为 16 个新数据点添加类型。Icon2 switch 现可写入。"
+      },
       "0.2.15": {
         "en": "Fixed invalid io-package.json (JSON syntax error). Adapter is now valid again and restored in the repository. No functional changes.",
         "de": "Fehler in io-package.json (ungültiges JSON) behoben. Adapter ist wieder gültig und im Repository verfügbar. Keine Funktionsänderungen.",
