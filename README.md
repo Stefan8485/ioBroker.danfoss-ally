@@ -324,6 +324,8 @@ All send, retry, and confirm logs appear at debug level.
 
 ---
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## Development
 
 ```bash
