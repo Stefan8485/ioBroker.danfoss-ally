@@ -10,7 +10,7 @@ on:
   pull_request: {}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -25,9 +25,9 @@ jobs:
       cancel-in-progress: true
 
     steps:
-      - uses: ioBroker/testing-action-check@v2.0.1
+      - uses: ioBroker/testing-action-check@v2
         with:
-          node-version: '24.x'
+          node-version: "24.x"
           lint: true
 
   # ---------------------------------------------------
@@ -75,7 +75,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: ioBroker/testing-action-deploy@v1.5.2
+      - uses: ioBroker/testing-action-deploy@v1
         with:
-          node-version: '24.x'
+          node-version: "24.x"
           github-token: ${{ secrets.GITHUB_TOKEN }}

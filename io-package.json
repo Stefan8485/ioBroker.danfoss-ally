@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.19",
+    "version": "0.2.20",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,18 +29,31 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.20": {
+        "en": "Reduced debug log noise after startup by logging only real value changes during repeated polls. Added Boiler Relay fallback objects when the Danfoss API lists the relay but returns no status entries. Resolved repository checker warnings.",
+        "de": "Debug-Logs nach dem Start deutlich reduziert: Wiederholte Polls loggen nur noch echte Wertänderungen. Zusätzlich werden Boiler-Relay-Fallback-Objekte angelegt, wenn die Danfoss API das Relay listet, aber keine Statuswerte liefert. Repository-Checker-Warnungen behoben.",
+        "ru": "Уменьшен шум debug-лога после запуска: при повторных опросах выводятся только реальные изменения значений. Добавлены fallback-объекты Boiler Relay, если Danfoss API показывает реле, но не возвращает статусы. Исправлены предупреждения repository checker.",
+        "pt": "Reduzido o ruído do log de debug após a inicialização: nas consultas repetidas são registadas apenas alterações reais de valores. Adicionados objetos de fallback para Boiler Relay quando a API Danfoss lista o relé, mas não devolve estados. Avisos do repository checker corrigidos.",
+        "nl": "Debuglog na het starten duidelijk stiller gemaakt: bij herhaalde polls worden alleen echte waardewijzigingen gelogd. Fallback-objecten voor Boiler Relay toegevoegd wanneer de Danfoss API het relais toont maar geen statuswaarden teruggeeft. Repository-checker waarschuwingen opgelost.",
+        "fr": "Réduction du bruit dans le journal debug après le démarrage : les polls répétés ne consignent plus que les vraies modifications de valeurs. Ajout d'objets de repli pour Boiler Relay lorsque l'API Danfoss liste le relais sans retourner de statuts. Avertissements du repository checker corrigés.",
+        "it": "Ridotto il rumore del log debug dopo l'avvio: nei poll ripetuti vengono registrate solo le modifiche reali dei valori. Aggiunti oggetti fallback per Boiler Relay quando l'API Danfoss elenca il relè ma non restituisce stati. Avvisi del repository checker corretti.",
+        "es": "Reducido el ruido del log de depuración después del inicio: en los sondeos repetidos solo se registran cambios reales de valores. Añadidos objetos de reserva para Boiler Relay cuando la API de Danfoss lista el relé pero no devuelve estados. Advertencias del repository checker corregidas.",
+        "pl": "Ograniczono ilość wpisów debug po starcie: przy kolejnych odpytywaniach logowane są tylko rzeczywiste zmiany wartości. Dodano obiekty fallback dla Boiler Relay, gdy API Danfoss pokazuje przekaźnik, ale nie zwraca statusów. Usunięto ostrzeżenia repository checker.",
+        "uk": "Зменшено шум debug-журналу після запуску: під час повторних опитувань записуються лише реальні зміни значень. Додано fallback-об'єкти Boiler Relay, якщо Danfoss API показує реле, але не повертає статуси. Виправлено попередження repository checker.",
+        "zh-cn": "启动后减少 debug 日志噪音：重复轮询时只记录真实的数值变化。当 Danfoss API 列出 Boiler Relay 但没有返回状态项时，会创建备用对象。已修复 repository checker 警告。"
+      },
       "0.2.19": {
         "en": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
         "de": "Polls schreiben Cloud-Werte nicht mehr in control-States zurück, um Rückkopplungen mit externen Systemen zu vermeiden. Schreibquellen werden im Debug-Log mitgeloggt, Geräte ohne Statuswerte werden zusätzlich per Einzelstatus abgefragt und Poll-Debug-Logs werden kompakter zusammengefasst.",
-        "ru": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "pt": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "nl": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "fr": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "it": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "es": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "pl": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "uk": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries.",
-        "zh-cn": "Stopped polling from writing cloud values back into control states to avoid feedback loops with external systems. Added write source logging, direct status fallback for devices without status values, and quieter poll debug summaries."
+        "ru": "Опрос больше не записывает значения из облака обратно в control-состояния, чтобы избежать обратных связей с внешними системами. Добавлено логирование источника записи, прямой fallback статуса для устройств без значений статуса и более тихие debug-сводки опроса.",
+        "pt": "A consulta deixou de escrever valores da cloud de volta nos estados control para evitar ciclos de feedback com sistemas externos. Adicionado log da origem da escrita, fallback de estado direto para dispositivos sem valores de estado e resumos de debug de poll mais silenciosos.",
+        "nl": "Polls schrijven cloudwaarden niet meer terug naar control-states om terugkoppelingen met externe systemen te voorkomen. Schrijfbronlogging, directe statusfallback voor apparaten zonder statuswaarden en stillere poll-debugsamenvattingen toegevoegd.",
+        "fr": "Les polls n'écrivent plus les valeurs du cloud dans les états control afin d'éviter les boucles de rétroaction avec des systèmes externes. Ajout du journal de la source d'écriture, d'un repli direct de statut pour les appareils sans valeurs de statut et de résumés debug plus discrets.",
+        "it": "Il polling non scrive più i valori cloud negli stati control per evitare cicli di feedback con sistemi esterni. Aggiunti log della sorgente di scrittura, fallback diretto dello stato per dispositivi senza valori di stato e riepiloghi debug del poll più silenziosi.",
+        "es": "El sondeo ya no escribe valores de la nube de vuelta en los estados control para evitar bucles de retroalimentación con sistemas externos. Añadido log de origen de escritura, fallback de estado directo para dispositivos sin valores de estado y resúmenes de debug más silenciosos.",
+        "pl": "Odpytywanie nie zapisuje już wartości z chmury z powrotem do stanów control, aby uniknąć pętli zwrotnych z systemami zewnętrznymi. Dodano logowanie źródła zapisu, bezpośredni fallback statusu dla urządzeń bez wartości statusu oraz cichsze podsumowania debug.",
+        "uk": "Опитування більше не записує хмарні значення назад у control-стани, щоб уникнути зворотних петель із зовнішніми системами. Додано логування джерела запису, прямий fallback статусу для пристроїв без статусних значень і тихіші debug-підсумки опитування.",
+        "zh-cn": "轮询不再把云端值写回 control 状态，以避免与外部系统形成反馈循环。新增写入来源日志、无状态值设备的直接状态备用查询，以及更安静的轮询 debug 汇总。"
       },
       "0.2.18": {
         "en": "Improved Ally TRV setpoint writes by additionally sending manual_mode_fast when available, added warnings when the Danfoss Cloud does not confirm a requested setpoint, and improved device naming/detection for relay-like devices.",
@@ -121,17 +134,8 @@
         "zh-cn": "维护版本：更新 CI/部署流程、修复 npm 发布并改进格式。无功能更改。"
       }
     },
-    "authors": [
-      "Stefan Koch <stefan8485@me.com>"
-    ],
-    "keywords": [
-      "Danfoss",
-      "Ally",
-      "Heating",
-      "Thermostat",
-      "Humidity",
-      "Cloud"
-    ],
+    "authors": ["Stefan Koch <stefan8485@me.com>"],
+    "keywords": ["Danfoss", "Ally", "Heating", "Thermostat", "Humidity", "Cloud"],
     "enabled": true,
     "mode": "daemon",
     "licenseInformation": {
@@ -171,14 +175,8 @@
     "scope": "",
     "pollingInterval": 300
   },
-  "protectedNative": [
-    "apiKey",
-    "apiSecret"
-  ],
-  "encryptedNative": [
-    "apiKey",
-    "apiSecret"
-  ],
+  "protectedNative": ["apiKey", "apiSecret"],
+  "encryptedNative": ["apiKey", "apiSecret"],
   "objects": [],
   "instanceObjects": []
 }

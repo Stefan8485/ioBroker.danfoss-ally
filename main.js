@@ -159,17 +159,95 @@ function logVal(v) {
   return dval(v);
 }
 
+function looksLikeDeviceObject(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return false;
+  }
+
+  return [
+    "id",
+    "deviceId",
+    "uid",
+    "name",
+    "device_type",
+    "deviceType",
+    "online",
+    "time_zone",
+    "create_time",
+    "update_time",
+    "active_time"
+  ].some(key => Object.prototype.hasOwnProperty.call(value, key));
+}
+
 function statusEntriesFromRaw(raw) {
-  const status = raw && typeof raw === "object" && !Array.isArray(raw) ? (raw.result ?? raw.status ?? raw) : raw;
-  if (Array.isArray(status)) {
-    return status
+  if (!raw) {
+    return [];
+  }
+
+  if (Array.isArray(raw)) {
+    return raw
       .filter(entry => entry && typeof entry.code === "string" && entry.value !== undefined)
       .map(entry => [entry.code, entry.value]);
   }
-  if (status && typeof status === "object") {
-    return Object.entries(status);
+
+  if (typeof raw !== "object") {
+    return [];
   }
-  return [];
+
+  if (raw.result !== undefined) {
+    const resultStatus = statusEntriesFromRaw(raw.result?.status);
+    if (resultStatus.length) {
+      return resultStatus;
+    }
+    if (!looksLikeDeviceObject(raw.result)) {
+      return statusEntriesFromRaw(raw.result);
+    }
+  }
+
+  if (raw.status !== undefined) {
+    return statusEntriesFromRaw(raw.status);
+  }
+
+  if (looksLikeDeviceObject(raw)) {
+    return [];
+  }
+
+  return Object.entries(raw).filter(([code, value]) => code && value !== undefined && typeof value !== "function");
+}
+
+function normalizeStateValue(value) {
+  if (value === undefined) {
+    return undefined;
+  }
+  if (value === null) {
+    return "";
+  }
+  if (typeof value === "object") {
+    try {
+      return JSON.stringify(value);
+    } catch {
+      return String(value);
+    }
+  }
+  return value;
+}
+
+function isBoilerRelayDevice(dev) {
+  const text = [
+    dev?.type,
+    dev?.name,
+    dev?.raw?.device_type,
+    dev?.raw?.deviceType,
+    dev?.raw?.type,
+    dev?.raw?.productName,
+    dev?.raw?.product_name,
+    dev?.raw?.category
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return text.includes("boiler") && text.includes("relay");
 }
 
 function coerceTypeByHint(code, value) {
@@ -292,7 +370,8 @@ class DanfossAlly extends utils.Adapter {
     const pollChanges = new Map();
     let changed = 0,
       skipped = 0,
-      held = 0;
+      held = 0,
+      ackFixed = 0;
 
     try {
       // Anti-Race: direkt nach einem lokalen Write kurz nicht pollen
@@ -307,7 +386,9 @@ class DanfossAlly extends utils.Adapter {
         return;
       }
 
-      this.log.debug(`Found ${devices.length} devices, updating states...`);
+      if (initialStatusLog) {
+        this.log.debug(`Found ${devices.length} devices, updating states...`);
+      }
 
       for (const dev of devices) {
         // IDs immer sanitizen
@@ -334,9 +415,11 @@ class DanfossAlly extends utils.Adapter {
           });
         }
 
-        this.log.debug(
-          `DEVICE ${devId}: name="${dev.name || "Device"}" type="${dev.type || "unknown"}" online=${dev.online}`
-        );
+        if (initialStatusLog) {
+          this.log.debug(
+            `DEVICE ${devId}: name="${dev.name || "Device"}" type="${dev.type || "unknown"}" online=${dev.online}`
+          );
+        }
 
         // Channel "status" unter dem Gerät anlegen
         await this.setObjectNotExistsAsync(`${devPath}.status`, {
@@ -357,7 +440,18 @@ class DanfossAlly extends utils.Adapter {
         if (!pairs.length) {
           const directStatus = await this.api.getDeviceStatus(dev.id);
           pairs = statusEntriesFromRaw(directStatus);
-          this.log.debug(`STATUS ${devId}: loaded ${pairs.length} entries via direct status endpoint`);
+          if (initialStatusLog) {
+            this.log.debug(`STATUS ${devId}: loaded ${pairs.length} entries via direct status endpoint`);
+          }
+        }
+
+        if (!pairs.length && isBoilerRelayDevice(dev)) {
+          await this._ensureStatusAndControlObjects(devPath, "switch", false);
+          await this._ensureStatusAndControlObjects(devPath, "fault", 0);
+          if (initialStatusLog) {
+            this.log.debug(`RELAY ${devId}: no status values; created fallback switch/fault objects`);
+          }
+          continue;
         }
 
         for (const [codeRaw, rawValue] of pairs) {
@@ -384,101 +478,10 @@ class DanfossAlly extends utils.Adapter {
 
           // Typ stabilisieren (verhindert Type-Flips)
           value = coerceTypeByHint(code, value);
+          value = normalizeStateValue(value);
 
-          // Objekt anlegen/angleichen (stabile Metadaten)
-          const forcedType =
-            TYPE_HINTS.get(code) ||
-            (typeof value === "number" ? "number" : typeof value === "boolean" ? "boolean" : "string");
-          const unit = UNIT_HINTS.get(code) || this.mapUnit(code);
-
+          await this._ensureStatusAndControlObjects(devPath, code, value);
           const id = `${devPath}.status.${code}`;
-          const existing = await this.getObjectAsync(id);
-          if (!existing) {
-            await this.setObjectAsync(id, {
-              type: "state",
-              common: {
-                name: code,
-                type: forcedType,
-                role: this.mapRole(code),
-                unit,
-                read: true,
-                write: false
-              },
-              native: {}
-            });
-          } else {
-            const c = existing.common || {};
-            const needExtend =
-              c.type !== forcedType ||
-              c.unit !== (unit || "") ||
-              c.read !== true ||
-              c.write !== false ||
-              c.role !== this.mapRole(code) ||
-              c.name !== code;
-
-            if (needExtend) {
-              await this.extendObjectAsync(id, {
-                common: {
-                  ...c,
-                  name: code,
-                  type: forcedType,
-                  role: this.mapRole(code),
-                  unit,
-                  read: true,
-                  write: false
-                }
-              });
-            }
-          }
-
-          // Writeable DPs zusätzlich unter ".control.<code>" anlegen
-          if (WRITEABLE_CODES.has(code)) {
-            const cid = `${devPath}.control.${code}`;
-            const existingC = await this.getObjectAsync(cid);
-            const forcedTypeC = TYPE_HINTS.get(code) || forcedType;
-            const unitC = UNIT_HINTS.get(code) || unit;
-
-            if (!existingC) {
-              await this.setObjectAsync(cid, {
-                type: "state",
-                common: {
-                  name: code,
-                  type: forcedTypeC,
-                  role: this.mapRole(code),
-                  unit: unitC,
-                  read: true,
-                  write: true
-                },
-                native: {}
-              });
-            } else {
-              const cc = existingC.common || {};
-              const needExtendC =
-                cc.type !== forcedTypeC ||
-                cc.unit !== (unitC || "") ||
-                cc.read !== true ||
-                cc.write !== true ||
-                cc.role !== this.mapRole(code) ||
-                cc.name !== code;
-
-              if (needExtendC) {
-                await this.extendObjectAsync(cid, {
-                  common: {
-                    ...cc,
-                    name: code,
-                    type: forcedTypeC,
-                    role: this.mapRole(code),
-                    unit: unitC,
-                    read: true,
-                    write: true
-                  }
-                });
-              }
-            }
-
-            // control ist reiner Schreibkanal. Cloud-Rueckmeldungen stehen unter status.
-            // So vermeiden wir Feedback-Loops mit externen Systemen, die control.* abonnieren.
-          }
 
           // Pending-Write-Hold: Poll soll lokale Writes nicht direkt überschreiben
           const key = `${devId}.${code}`;
@@ -518,27 +521,33 @@ class DanfossAlly extends utils.Adapter {
           }
 
           const oldState = await this.getStateAsync(id);
-          const oldKnown = oldState && oldState.val !== undefined && oldState.val !== null;
-          const result = await this.setStateChangedAsync(id, value, true);
-          if (result) {
-            // result = true → Wert wurde geändert
-            changed++;
-            if (initialStatusLog) {
-              this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
-            } else {
-              const ackOnly = oldKnown && isSameVal(code, oldState.val, value) && oldState.ack !== true;
-              const text = ackOnly
-                ? `${code}: ${logVal(value)} (ack corrected)`
-                : `${code}: ${logVal(oldState?.val)} -> ${logVal(value)}`;
+          const sameValue = oldState && oldState.val !== undefined && isSameVal(code, oldState.val, value);
+          const ackOk = oldState?.ack === true;
 
+          if (initialStatusLog) {
+            this.log.debug(`SET ${devId}.${code}=${dval(value)} (ack)`);
+          }
+
+          if (sameValue && ackOk) {
+            skipped++;
+            continue;
+          }
+
+          await this.setStateAsync(id, {
+            val: value,
+            ack: true
+          });
+
+          if (sameValue) {
+            ackFixed++;
+          } else {
+            changed++;
+            if (!initialStatusLog) {
               if (!pollChanges.has(devId)) {
                 pollChanges.set(devId, []);
               }
-              pollChanges.get(devId).push(text);
+              pollChanges.get(devId).push(`${code}: ${logVal(oldState?.val)} -> ${logVal(value)}`);
             }
-          } else {
-            // result = false → Wert war identisch, wurde NICHT geschrieben
-            skipped++;
           }
         }
       }
@@ -553,11 +562,68 @@ class DanfossAlly extends utils.Adapter {
       }
 
       this.log.debug(
-        `Updated ${devices.length} devices. Mode=${initialStatusLog ? "initial" : "poll"}, Changed=${changed}, Skipped=${skipped}, Held=${held}`
+        `Updated ${devices.length} devices. Mode=${initialStatusLog ? "initial" : "poll"}, Changed=${changed}, Skipped=${skipped}, Held=${held}, AckFixed=${ackFixed}`
       );
       this._initialStatusLogDone = true;
     } catch (err) {
       this.log.error(`Error updating devices: ${err.message}`);
+    }
+  }
+
+  async _ensureStateObject(id, code, sampleValue, write) {
+    const forcedType =
+      TYPE_HINTS.get(code) ||
+      (typeof sampleValue === "number" ? "number" : typeof sampleValue === "boolean" ? "boolean" : "string");
+    const unit = UNIT_HINTS.get(code) || this.mapUnit(code) || "";
+    const existing = await this.getObjectAsync(id);
+
+    if (!existing) {
+      await this.setObjectAsync(id, {
+        type: "state",
+        common: {
+          name: code,
+          type: forcedType,
+          role: this.mapRole(code),
+          unit,
+          read: true,
+          write
+        },
+        native: {}
+      });
+      return;
+    }
+
+    const c = existing.common || {};
+    const needExtend =
+      c.type !== forcedType ||
+      (c.unit || "") !== unit ||
+      c.read !== true ||
+      c.write !== write ||
+      c.role !== this.mapRole(code) ||
+      c.name !== code;
+
+    if (needExtend) {
+      await this.extendObjectAsync(id, {
+        common: {
+          ...c,
+          name: code,
+          type: forcedType,
+          role: this.mapRole(code),
+          unit,
+          read: true,
+          write
+        }
+      });
+    }
+  }
+
+  async _ensureStatusAndControlObjects(devPath, code, sampleValue) {
+    await this._ensureStateObject(`${devPath}.status.${code}`, code, sampleValue, false);
+
+    if (WRITEABLE_CODES.has(code)) {
+      await this._ensureStateObject(`${devPath}.control.${code}`, code, sampleValue, true);
+      // control ist reiner Schreibkanal. Cloud-Rueckmeldungen stehen unter status.
+      // So vermeiden wir Feedback-Loops mit externen Systemen, die control.* abonnieren.
     }
   }
 
@@ -627,6 +693,7 @@ class DanfossAlly extends utils.Adapter {
           value = value / 10;
         }
         value = coerceTypeByHint(code, value);
+        value = normalizeStateValue(value);
 
         const id = `${devPath}.status.${code}`;
         const key = `${deviceId}.${code}`;
@@ -876,9 +943,8 @@ class DanfossAlly extends utils.Adapter {
       return;
     }
 
-    // 2) ack=true: nur Debug (kein Write auslösen)
+    // 2) ack=true: kein externer Schreibwunsch, daher ignorieren
     if (state.ack) {
-      this.log.debug(`ack=true update ignored: ${id}`);
       return;
     }
 
