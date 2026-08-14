@@ -39,7 +39,7 @@
     "@iobroker/eslint-config": "^2.3.4",
     "@iobroker/testing": "^5.3.0",
     "@tsconfig/node22": "^22.0.5",
-    "@types/node": ">=22",
+    "@types/node": ">=25",
     "jsonlint": "^1.6.3"
   },
   "engines": {
