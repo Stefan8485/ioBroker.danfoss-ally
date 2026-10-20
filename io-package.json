@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "danfoss-ally",
-    "version": "0.2.20",
+    "version": "0.2.21",
     "titleLang": {
       "en": "danfoss-ally cloud",
       "de": "danfoss-ally cloud",
@@ -29,6 +29,19 @@
       "zh-cn": "将 ioBroker 连接到 Danfoss Ally 云 API。"
     },
     "news": {
+      "0.2.21": {
+        "en": "Updated ioBroker testing to 6.3.0, added Node.js 26 to CI, and updated dependencies. Boiler Relay fallback and quieter debug polling are included.",
+        "de": "ioBroker-Tests auf 6.3.0 aktualisiert, Node.js 26 zur CI-Testmatrix hinzugefügt und Abhängigkeiten aktualisiert. Boiler-Relay-Fallback und ruhigere Debug-Abfragen sind enthalten.",
+        "ru": "Обновлены тесты ioBroker до 6.3.0, Node.js 26 добавлен в CI, зависимости обновлены. Включены резервные объекты Boiler Relay и более тихие debug-опросы.",
+        "pt": "Testes ioBroker atualizados para 6.3.0, Node.js 26 adicionado à matriz de CI e dependências atualizadas. Inclui fallback do Boiler Relay e consultas de debug mais silenciosas.",
+        "nl": "ioBroker-tests bijgewerkt naar 6.3.0, Node.js 26 toegevoegd aan de CI-matrix en afhankelijkheden bijgewerkt. Inclusief Boiler Relay-fallback en stillere debugpolls.",
+        "fr": "Tests ioBroker mis à jour vers la version 6.3.0, Node.js 26 ajouté à la matrice CI et dépendances mises à jour. Inclut le fallback Boiler Relay et des interrogations debug plus discrètes.",
+        "it": "Test ioBroker aggiornati alla versione 6.3.0, Node.js 26 aggiunto alla matrice CI e dipendenze aggiornate. Include il fallback Boiler Relay e polling debug più silenziosi.",
+        "es": "Pruebas de ioBroker actualizadas a 6.3.0, Node.js 26 añadido a la matriz de CI y dependencias actualizadas. Incluye fallback de Boiler Relay y consultas debug más silenciosas.",
+        "pl": "Zaktualizowano testy ioBroker do wersji 6.3.0, dodano Node.js 26 do macierzy CI i zaktualizowano zależności. Dodano fallback Boiler Relay i cichsze odpytywanie debug.",
+        "uk": "Тести ioBroker оновлено до 6.3.0, Node.js 26 додано до матриці CI, залежності оновлено. Додано резервні об'єкти Boiler Relay і тихіше debug-опитування.",
+        "zh-cn": "ioBroker 测试更新至 6.3.0，CI 矩阵加入 Node.js 26，并更新依赖项。包含 Boiler Relay 回退对象和更安静的调试轮询。"
+      },
       "0.2.20": {
         "en": "Reduced debug log noise after startup by logging only real value changes during repeated polls. Added Boiler Relay fallback objects when the Danfoss API lists the relay but returns no status entries. Resolved repository checker warnings.",
         "de": "Debug-Logs nach dem Start deutlich reduziert: Wiederholte Polls loggen nur noch echte Wertänderungen. Zusätzlich werden Boiler-Relay-Fallback-Objekte angelegt, wenn die Danfoss API das Relay listet, aber keine Statuswerte liefert. Repository-Checker-Warnungen behoben.",
@@ -106,32 +119,6 @@
         "pl": "Naprawiono błąd w io-package.json (nieprawidłowy JSON). Adapter ponownie poprawny i dostępny w repozytorium. Brak zmian funkcjonalnych.",
         "uk": "Виправлено помилку в io-package.json (некоректний JSON). Адаптер знову валідний і доступний у репозиторії. Без функціональних змін.",
         "zh-cn": "修复 io-package.json 中的错误（无效 JSON）。适配器现已恢复正常并重新加入仓库。无功能更改。"
-      },
-      "0.2.14": {
-        "en": "Introduced control channel for writeable states. Status states are now read-only. Improved write handling and stability.",
-        "de": "Neuer control-Kanal für schreibbare States. Status-States sind nun read-only. Verbesserte Write-Logik und Stabilität.",
-        "ru": "Добавлен канал control для записываемых состояний. Status теперь только для чтения.",
-        "pt": "Adicionado canal control para estados graváveis. Status agora somente leitura.",
-        "nl": "Control-kanaal toegevoegd voor schrijfbare states. Status nu alleen-lezen.",
-        "fr": "Ajout d'un canal control pour les états modifiables. Status est désormais en lecture seule.",
-        "it": "Aggiunto canale control per gli stati scrivibili. Status ora è solo lettura.",
-        "es": "Se agregó canal control para estados editables. Status ahora es solo lectura.",
-        "pl": "Dodano kanał control dla zapisywalnych stanów. Status tylko do odczytu.",
-        "uk": "Додано канал control для записуваних станів. Status лише для читання.",
-        "zh-cn": "新增 control 通道用于可写状态，status 现在为只读。"
-      },
-      "0.2.13": {
-        "en": "Maintenance release: updated CI/deploy workflow, fixed npm publishing and improved formatting (Prettier/ESLint). No functional changes.",
-        "de": "Wartungsupdate: CI/Deploy-Workflow aktualisiert, npm-Veröffentlichung korrigiert und Formatierung verbessert (Prettier/ESLint). Keine Funktionsänderungen.",
-        "ru": "Технический релиз: обновлены CI/деплой, исправлена публикация npm и улучшено форматирование. Изменений функционала нет.",
-        "pt": "Lançamento de manutenção: CI/deploy atualizado, publicação no npm corrigida e formatação aprimorada. Sem mudanças funcionais.",
-        "nl": "Onderhoudsrelease: CI/deploy bijgewerkt, npm-publicatie verbeterd en formatting verbeterd. Geen functionele wijzigingen.",
-        "fr": "Version de maintenance : CI/deploy mis à jour, publication npm corrigée et formatage amélioré. Aucun changement fonctionnel.",
-        "it": "Release di manutenzione: aggiornato CI/deploy, corretta pubblicazione npm e migliorata la formattazione. Nessuna modifica funzionale.",
-        "es": "Lanzamiento de mantenimiento: CI/deploy actualizado, publicación npm corregida y formato mejorado. Sin cambios funcionales.",
-        "pl": "Wydanie konserwacyjne: zaktualizowano CI/deploy, poprawiono publikację npm i ulepszono formatowanie. Brak zmian funkcjonalnych.",
-        "uk": "Технічний реліз: оновлено CI/deploy, виправлено публікацію npm і покращено форматування. Жодних змін у функціональності.",
-        "zh-cn": "维护版本：更新 CI/部署流程、修复 npm 发布并改进格式。无功能更改。"
       }
     },
     "authors": ["Stefan Koch <stefan8485@me.com>"],

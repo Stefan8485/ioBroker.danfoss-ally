@@ -31,7 +31,7 @@ jobs:
           lint: true
 
   # ---------------------------------------------------
-  # 2) FULL TEST MATRIX (Node 22/24 + Linux/Win/Mac)
+  # 2) FULL TEST MATRIX (Node 22/24/26 + Linux/Win/Mac)
   # ---------------------------------------------------
   adapter-tests:
     if: contains(github.event.head_commit.message, '[skip ci]') == false
@@ -44,7 +44,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [22.x, 24.x, 26.x]
         os: [ubuntu-latest, windows-latest, macos-latest]
 
     env:
